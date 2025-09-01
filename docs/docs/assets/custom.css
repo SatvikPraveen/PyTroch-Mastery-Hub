@@ -1,0 +1,478 @@
+/* docs/docs/assets/custom.css */
+/* Custom styles for ML Training Framework documentation */
+
+/* Color scheme and variables */
+:root {
+  --primary-color: #2196f3;
+  --secondary-color: #1976d2;
+  --accent-color: #ffc107;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --error-color: #f44336;
+
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --background-light: #fafafa;
+  --border-color: #e0e0e0;
+
+  --code-background: #f5f5f5;
+  --code-border: #e0e0e0;
+
+  --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.12);
+
+  --border-radius: 8px;
+  --transition: all 0.2s ease-in-out;
+}
+
+/* Dark mode variables */
+[data-md-color-scheme="slate"] {
+  --text-primary: #ffffff;
+  --text-secondary: #b0bec5;
+  --background-light: #263238;
+  --border-color: #37474f;
+  --code-background: #37474f;
+  --code-border: #455a64;
+}
+
+/* Header and navigation improvements */
+.md-header {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  box-shadow: var(--shadow-medium);
+}
+
+.md-header__title {
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+/* Navigation tabs styling */
+.md-tabs {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.md-tabs__item {
+  transition: var(--transition);
+}
+
+.md-tabs__link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+}
+
+/* Content area improvements */
+.md-content {
+  max-width: none;
+}
+
+.md-main__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Typography enhancements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 2em;
+  margin-bottom: 0.8em;
+}
+
+h1 {
+  border-bottom: 3px solid var(--primary-color);
+  padding-bottom: 0.5em;
+  color: var(--primary-color);
+}
+
+h2 {
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+/* Code block improvements */
+.highlight {
+  margin: 1.5em 0;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+}
+
+.highlight pre {
+  margin: 0;
+  padding: 1.2em;
+  background: var(--code-background) !important;
+  border-left: 4px solid var(--primary-color);
+}
+
+/* Inline code styling */
+code:not(.highlight code) {
+  background: var(--code-background);
+  color: var(--primary-color);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-weight: 500;
+  border: 1px solid var(--code-border);
+}
+
+/* Admonition improvements */
+.admonition {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  margin: 1.5em 0;
+  overflow: hidden;
+}
+
+.admonition.tip {
+  border-left: 4px solid var(--success-color);
+}
+
+.admonition.warning {
+  border-left: 4px solid var(--warning-color);
+}
+
+.admonition.danger {
+  border-left: 4px solid var(--error-color);
+}
+
+.admonition.info {
+  border-left: 4px solid var(--primary-color);
+}
+
+.admonition-title {
+  font-weight: 600;
+  padding: 0.8em 1em;
+  margin: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Table improvements */
+table {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  margin: 1.5em 0;
+}
+
+th {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  color: white;
+  font-weight: 600;
+  padding: 1em;
+  text-align: left;
+}
+
+td {
+  padding: 0.8em 1em;
+  border-bottom: 1px solid var(--border-color);
+}
+
+tr:hover {
+  background: var(--background-light);
+}
+
+/* Button and link styling */
+.md-button {
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  transition: var(--transition);
+  text-transform: none;
+}
+
+.md-button--primary {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  border: none;
+}
+
+.md-button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Link styling */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
+/* Badge styling for notebooks and examples */
+.notebook-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--accent-color), #ffb300);
+  color: #1a1a1a;
+  padding: 0.3em 0.8em;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin: 0.2em 0.5em 0.2em 0;
+  text-decoration: none;
+}
+
+.difficulty-badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+  margin: 0.2em 0.3em 0.2em 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.difficulty-beginner {
+  background: #e8f5e8;
+  color: #2e7d32;
+  border: 1px solid #4caf50;
+}
+
+.difficulty-intermediate {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ff9800;
+}
+
+.difficulty-advanced {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #f44336;
+}
+
+/* Feature cards */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5em;
+  margin: 2em 0;
+}
+
+.feature-card {
+  background: var(--background-light);
+  border-radius: var(--border-radius);
+  padding: 1.5em;
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+  border: 1px solid var(--border-color);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
+}
+
+.feature-card h3 {
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 0.8em;
+}
+
+.feature-card p {
+  margin-bottom: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Tab styling for content sections */
+.tabbed-set {
+  margin: 1.5em 0;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+}
+
+.tabbed-labels {
+  display: flex;
+  background: var(--background-light);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tabbed-labels label {
+  padding: 1em 1.5em;
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+}
+
+.tabbed-labels label:hover {
+  background: rgba(33, 150, 243, 0.1);
+}
+
+.tabbed-labels label[for]:checked {
+  background: var(--primary-color);
+  color: white;
+  border-bottom-color: var(--secondary-color);
+}
+
+/* Code copy button improvements */
+.md-clipboard {
+  background: var(--primary-color);
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.md-clipboard:hover {
+  background: var(--secondary-color);
+  transform: scale(1.1);
+}
+
+/* Search improvements */
+.md-search__form {
+  border-radius: var(--border-radius);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.md-search__input {
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.md-search__input:focus {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Footer improvements */
+.md-footer {
+  background: linear-gradient(135deg, #263238, #37474f);
+  color: white;
+}
+
+.md-footer-meta {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive design improvements */
+@media screen and (max-width: 768px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 1em;
+  }
+
+  .tabbed-labels {
+    flex-wrap: wrap;
+  }
+
+  .tabbed-labels label {
+    padding: 0.8em 1em;
+    font-size: 0.9em;
+  }
+
+  h1 {
+    font-size: 1.8em;
+  }
+
+  .highlight pre {
+    padding: 1em;
+    font-size: 0.9em;
+  }
+}
+
+/* Print styles */
+@media print {
+  .md-header,
+  .md-tabs,
+  .md-sidebar,
+  .md-footer {
+    display: none !important;
+  }
+
+  .md-content {
+    margin: 0;
+  }
+
+  .md-main__inner {
+    max-width: none;
+  }
+
+  .highlight pre {
+    background: #f5f5f5 !important;
+    border: 1px solid #ddd !important;
+    color: #333 !important;
+  }
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.text-muted {
+  color: var(--text-secondary);
+}
+.text-primary {
+  color: var(--primary-color);
+}
+.text-success {
+  color: var(--success-color);
+}
+.text-warning {
+  color: var(--warning-color);
+}
+.text-error {
+  color: var(--error-color);
+}
+
+.mt-1 {
+  margin-top: 0.5em;
+}
+.mt-2 {
+  margin-top: 1em;
+}
+.mt-3 {
+  margin-top: 1.5em;
+}
+.mb-1 {
+  margin-bottom: 0.5em;
+}
+.mb-2 {
+  margin-bottom: 1em;
+}
+.mb-3 {
+  margin-bottom: 1.5em;
+}

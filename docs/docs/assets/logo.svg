@@ -1,0 +1,109 @@
+<!-- docs/docs/assets/logo.svg -->
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1976D2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="neuronGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFC107;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF9800;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Main background -->
+  <circle cx="60" cy="60" r="58" fill="url(#bgGradient)" stroke="#1565C0" stroke-width="2"/>
+  
+  <!-- Neural network nodes -->
+  <!-- Input layer -->
+  <circle cx="25" cy="40" r="4" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  <circle cx="25" cy="60" r="4" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  <circle cx="25" cy="80" r="4" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  
+  <!-- Hidden layer 1 -->
+  <circle cx="50" cy="30" r="5" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  <circle cx="50" cy="50" r="5" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  <circle cx="50" cy="70" r="5" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  <circle cx="50" cy="90" r="5" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  
+  <!-- Hidden layer 2 -->
+  <circle cx="75" cy="40" r="5" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  <circle cx="75" cy="60" r="5" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  <circle cx="75" cy="80" r="5" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  
+  <!-- Output layer -->
+  <circle cx="95" cy="50" r="6" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  <circle cx="95" cy="70" r="6" fill="url(#neuronGradient)" filter="url(#glow)"/>
+  
+  <!-- Connections between neurons -->
+  <g stroke="#E3F2FD" stroke-width="1.5" opacity="0.8">
+    <!-- Input to Hidden 1 -->
+    <line x1="25" y1="40" x2="50" y2="30"/>
+    <line x1="25" y1="40" x2="50" y2="50"/>
+    <line x1="25" y1="40" x2="50" y2="70"/>
+    
+    <line x1="25" y1="60" x2="50" y2="30"/>
+    <line x1="25" y1="60" x2="50" y2="50"/>
+    <line x1="25" y1="60" x2="50" y2="70"/>
+    <line x1="25" y1="60" x2="50" y2="90"/>
+    
+    <line x1="25" y1="80" x2="50" y2="50"/>
+    <line x1="25" y1="80" x2="50" y2="70"/>
+    <line x1="25" y1="80" x2="50" y2="90"/>
+    
+    <!-- Hidden 1 to Hidden 2 -->
+    <line x1="50" y1="30" x2="75" y2="40"/>
+    <line x1="50" y1="30" x2="75" y2="60"/>
+    
+    <line x1="50" y1="50" x2="75" y2="40"/>
+    <line x1="50" y1="50" x2="75" y2="60"/>
+    <line x1="50" y1="50" x2="75" y2="80"/>
+    
+    <line x1="50" y1="70" x2="75" y2="40"/>
+    <line x1="50" y1="70" x2="75" y2="60"/>
+    <line x1="50" y1="70" x2="75" y2="80"/>
+    
+    <line x1="50" y1="90" x2="75" y2="60"/>
+    <line x1="50" y1="90" x2="75" y2="80"/>
+    
+    <!-- Hidden 2 to Output -->
+    <line x1="75" y1="40" x2="95" y2="50"/>
+    <line x1="75" y1="40" x2="95" y2="70"/>
+    
+    <line x1="75" y1="60" x2="95" y2="50"/>
+    <line x1="75" y1="60" x2="95" y2="70"/>
+    
+    <line x1="75" y1="80" x2="95" y2="50"/>
+    <line x1="75" y1="80" x2="95" y2="70"/>
+  </g>
+  
+  <!-- Data flow visualization -->
+  <g opacity="0.6">
+    <!-- Animated data points -->
+    <circle r="2" fill="#4CAF50">
+      <animateMotion dur="3s" repeatCount="indefinite">
+        <path d="M25,40 Q37,35 50,30 Q62,35 75,40 Q85,45 95,50"/>
+      </animateMotion>
+    </circle>
+    
+    <circle r="2" fill="#4CAF50">
+      <animateMotion dur="3s" repeatCount="indefinite" begin="0.5s">
+        <path d="M25,60 Q37,65 50,70 Q62,65 75,60 Q85,65 95,70"/>
+      </animateMotion>
+    </circle>
+  </g>
+  
+  <!-- Central ML text -->
+  <text x="60" y="115" font-family="Arial, sans-serif" font-size="12" font-weight="bold" 
+        text-anchor="middle" fill="#1565C0">ML Training</text>
+</svg>
