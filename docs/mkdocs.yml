@@ -1,0 +1,166 @@
+# docs/mkdocs.yml
+# MkDocs configuration for ML Training Framework documentation
+
+site_name: ML Training Framework
+site_description: A comprehensive PyTorch-based machine learning training framework
+site_author: ML Training Team
+site_url: https://ml-training.github.io/
+
+repo_name: ml-training-framework
+repo_url: https://github.com/ml-training/framework
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2024 ML Training Framework
+
+# Theme configuration
+theme:
+  name: material
+  language: en
+  palette:
+    # Light mode
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - header.autohide
+    - content.code.copy
+    - content.code.select
+    - content.tabs.link
+    - toc.follow
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+  logo: assets/logo.svg
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+
+# Navigation structure
+nav:
+  - Home: index.md
+  - Quick Start: quickstart.md
+  - Examples: examples.md
+  - API Reference:
+      - Overview: api/index.md
+      - Reference: api/reference.md
+  - Contributing: contributing.md
+
+# Markdown extensions
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      baselevel: 2
+  - tables
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: ml-training
+      repo: framework
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+# Plugins
+plugins:
+  - search:
+      lang: en
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_root_toc_entry: false
+            show_object_full_path: false
+            show_category_heading: true
+            show_if_no_docstring: true
+            inherited_members: true
+            members_order: alphabetical
+            separate_signature: true
+            unwrap_annotated: true
+            filters:
+              - "!^_"
+            merge_init_into_class: true
+            docstring_section_style: table
+            signature_crossrefs: true
+          paths: [../src]
+  - git-revision-date-localized:
+      type: date
+  - minify:
+      minify_html: true
+
+# Extra configuration
+extra:
+  version:
+    provider: mike
+    default: latest
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ml-training/framework
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/ml-training-framework/
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/ml-training/framework
+
+extra_css:
+  - assets/custom.css
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+# Development server
+dev_addr: "127.0.0.1:8000"
+
+# Build settings
+strict: true
+use_directory_urls: false

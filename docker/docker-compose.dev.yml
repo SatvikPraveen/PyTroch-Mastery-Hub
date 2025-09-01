@@ -1,0 +1,161 @@
+# docker/docker-compose.dev.yml
+# Development override for Docker Compose
+
+version: "3.8"
+
+services:
+  # Override app service for development
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: ml-training-app-dev
+    environment:
+      - PYTHONPATH=/app
+      - ENVIRONMENT=development
+      - DEBUG=1
+      - LOG_LEVEL=DEBUG
+      - DATABASE_URL=postgresql://mluser:mlpassword@postgres:5432/mldb
+      - REDIS_URL=redis://redis:6379/0
+      - CUDA_LAUNCH_BLOCKING=1
+      - TORCH_USE_CUDA_DSA=1
+    volumes:
+      - ../:/app # Mount entire project for hot reload
+      - /app/__pycache__ # Exclude pycache
+      - /app/.git # Exclude git
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+      - "8501:8501" # Streamlit
+      - "5678:5678" # Debugger port
+    stdin_open: true
+    tty: true
+    command: >
+      sh -c "echo 'Development container started' && 
+             python -c 'import torch; print(f\"PyTorch version: {torch.__version__}\")' &&
+             tail -f /dev/null"
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: "4.0"
+
+  # Development database with more permissive settings
+  postgres:
+    environment:
+      - POSTGRES_DB=mldb
+      - POSTGRES_USER=mluser
+      - POSTGRES_PASSWORD=mlpassword
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ../scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+      - ../scripts/seed-dev-data.sql:/docker-entrypoint-initdb.d/seed-dev-data.sql:ro
+    command: >
+      postgres
+      -c log_statement=all
+      -c log_destination=stderr
+      -c logging_collector=on
+      -c max_connections=200
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+
+  # Redis without password for development
+  redis:
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # Jupyter with development extensions
+  jupyter:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.jupyter
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - GRANT_SUDO=yes
+      - JUPYTER_TOKEN=
+    volumes:
+      - ../:/home/jovyan/work # Mount entire project
+    command: >
+      sh -c "pip install --no-cache-dir jupyter_contrib_nbextensions jupyterlab-git &&
+             jupyter contrib nbextension install --user &&
+             jupyter nbextension enable --py widgetsnbextension &&
+             start.sh jupyter lab --LabApp.token='' --LabApp.password='' --LabApp.allow_remote_access=True"
+
+  # Development MLflow with debug logging
+  mlflow:
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=postgresql://mluser:mlpassword@postgres:5432/mldb
+      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+      - MLFLOW_SERVER_HOST=0.0.0.0
+      - MLFLOW_SERVER_PORT=5000
+    command: >
+      sh -c "pip install mlflow psycopg2-binary boto3 &&
+             mlflow server
+             --backend-store-uri postgresql://mluser:mlpassword@postgres:5432/mldb
+             --default-artifact-root /mlflow/artifacts
+             --host 0.0.0.0
+             --port 5000
+             --serve-artifacts"
+
+  # Add additional development services
+  # Code quality tools
+  code-quality:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: ml-code-quality
+    volumes:
+      - ../:/app
+    working_dir: /app
+    command: >
+      sh -c "echo 'Code quality tools ready' &&
+             echo 'Run: docker exec ml-code-quality black .' &&
+             echo 'Run: docker exec ml-code-quality flake8 .' &&
+             echo 'Run: docker exec ml-code-quality mypy .' &&
+             tail -f /dev/null"
+    profiles:
+      - tools
+
+  # Testing service
+  test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: ml-test
+    environment:
+      - PYTHONPATH=/app
+      - ENVIRONMENT=test
+      - DATABASE_URL=postgresql://mluser:mlpassword@postgres:5432/test_mldb
+    volumes:
+      - ../:/app
+    working_dir: /app
+    command: >
+      sh -c "echo 'Test environment ready' &&
+             echo 'Run: docker exec ml-test pytest' &&
+             echo 'Run: docker exec ml-test pytest --cov' &&
+             tail -f /dev/null"
+    depends_on:
+      - postgres
+    profiles:
+      - test
+
+  # Documentation server
+  docs:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: ml-docs
+    volumes:
+      - ../:/app
+    working_dir: /app
+    ports:
+      - "8001:8001"
+    command: >
+      sh -c "pip install mkdocs mkdocs-material &&
+             mkdocs serve --dev-addr 0.0.0.0:8001"
+    profiles:
+      - docs
+
+volumes:
+  postgres_dev_data:
+    driver: local
