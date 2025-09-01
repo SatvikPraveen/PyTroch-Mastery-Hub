@@ -1,10 +1,21 @@
 # PyTorch Mastery Hub
 
-[![CI](https://github.com/SatvikPraveen/PyTorch-Mastery-Hub/workflows/ci/badge.svg)](https://github.com/SatvikPraveen/PyTorch-Mastery-Hub/actions)
-[![Documentation](https://github.com/SatvikPraveen/PyTorch-Mastery-Hub/workflows/deploy-docs/badge.svg)](https://satvikpraveen.github.io/PyTorch-Mastery-Hub/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Jupyter Notebook](https://img.shields.io/badge/jupyter-%23FA0F00.svg?style=flat&logo=jupyter&logoColor=white)](https://jupyter.org/)
+[![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=flat&logo=numpy&logoColor=white)](https://numpy.org/)
+[![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=flat&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=flat&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=flat&logo=Matplotlib&logoColor=black)](https://matplotlib.org/)
+[![OpenCV](https://img.shields.io/badge/opencv-%23white.svg?style=flat&logo=opencv&logoColor=white)](https://opencv.org/)
+[![TensorBoard](https://img.shields.io/badge/TensorBoard-%23FF6F00.svg?style=flat&logo=TensorBoard&logoColor=white)](https://www.tensorflow.org/tensorboard)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=flat&logo=pytest&logoColor=blue)](https://docs.pytest.org/)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com/SatvikPraveen)
 
 A comprehensive portfolio project demonstrating advanced PyTorch implementations across the entire machine learning spectrum. This repository showcases practical implementations of fundamental concepts, neural architectures, computer vision systems, natural language processing models, and production-ready deployment solutions.
 
