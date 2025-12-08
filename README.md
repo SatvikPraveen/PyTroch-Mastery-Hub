@@ -4,34 +4,28 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Jupyter Notebook](https://img.shields.io/badge/jupyter-%23FA0F00.svg?style=flat&logo=jupyter&logoColor=white)](https://jupyter.org/)
 [![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=flat&logo=numpy&logoColor=white)](https://numpy.org/)
 [![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=flat&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=flat&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
 [![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=flat&logo=Matplotlib&logoColor=black)](https://matplotlib.org/)
-[![OpenCV](https://img.shields.io/badge/opencv-%23white.svg?style=flat&logo=opencv&logoColor=white)](https://opencv.org/)
-[![TensorBoard](https://img.shields.io/badge/TensorBoard-%23FF6F00.svg?style=flat&logo=TensorBoard&logoColor=white)](https://www.tensorflow.org/tensorboard)
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=flat&logo=pytest&logoColor=blue)](https://docs.pytest.org/)
-[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com/SatvikPraveen)
 
-A comprehensive portfolio project demonstrating advanced PyTorch implementations across the entire machine learning spectrum. This repository showcases practical implementations of fundamental concepts, neural architectures, computer vision systems, natural language processing models, and production-ready deployment solutions.
+A comprehensive **PyTorch Learning and Implementation Reference** showcasing core concepts, architectural patterns, and best practices across the entire machine learning spectrum. This repository is designed as an educational resource for understanding PyTorch fundamentals and implementing deep learning models from scratch.
 
 ## 🎯 Project Overview
 
-This repository represents a complete exploration of the PyTorch ecosystem, featuring implementations that span from tensor fundamentals to production-scale machine learning systems. The codebase demonstrates proficiency in modern deep learning techniques, software engineering best practices, and MLOps workflows.
+This is a **learning-focused repository** that demonstrates how to implement PyTorch models and understand deep learning concepts through practical code examples. Rather than a production system, this codebase emphasizes clarity, educational value, and transferable patterns you can use in your own projects.
 
-### Technical Demonstrations
+### Learning Content Coverage
 
-- **Core Fundamentals**: Custom tensor operations, autograd implementations, and backpropagation mechanics
-- **Neural Architectures**: Multi-layer perceptrons, advanced network designs, and optimization strategies
-- **Computer Vision**: Convolutional networks, modern CNN architectures, and practical CV applications
-- **Natural Language Processing**: RNN/LSTM implementations, sequence models, and transformer architectures
-- **Generative Modeling**: GAN implementations, VAE architectures, and advanced generative techniques
-- **Production Systems**: Model optimization, API development, MLOps pipelines, and cloud deployment
-- **Research Applications**: Cutting-edge implementations and experimental techniques
+- **Core Fundamentals**: Tensor operations, autograd mechanics, custom gradients, and backpropagation visualization
+- **Neural Network Architectures**: MLPs, CNNs, RNNs, LSTMs, and Transformers implemented from scratch
+- **Computer Vision**: CNN architectures, attention mechanisms, and classification systems
+- **Natural Language Processing**: Text processing, sequence models, attention mechanisms, and transformers
+- **Generative Models**: GANs and VAEs with detailed implementations and training strategies
+- **Optimization Techniques**: Learning rate scheduling, gradient clipping, and training strategies
+- **Implementation Patterns**: Reusable components and best practices for building neural networks
 
 ## 🚀 Setup & Installation
 
@@ -41,7 +35,7 @@ This repository represents a complete exploration of the PyTorch ecosystem, feat
 - CUDA-compatible GPU (optional but recommended)
 - 8GB+ RAM recommended
 
-### Local Installation
+### Quick Start
 
 ```bash
 git clone https://github.com/SatvikPraveen/PyTorch-Mastery-Hub.git
@@ -54,283 +48,257 @@ source pytorch_env/bin/activate  # Windows: pytorch_env\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 pip install -e .
+
+# Start Jupyter and open the notebooks
+jupyter notebook notebooks/
 ```
 
-### Containerized Environment
-
-```bash
-# Development environment
-docker-compose -f docker/docker-compose.dev.yml up
-
-# Production environment
-docker-compose -f docker/docker-compose.prod.yml up
-
-# Jupyter notebook environment
-docker-compose -f docker/docker-compose.yml up jupyter
-```
-
-## 📁 Repository Architecture
+## 📁 Repository Structure
 
 ```
 PyTorch-Mastery-Hub/
-├── notebooks/                    # Implementation demonstrations
-│   ├── 01_fundamentals/          # Tensor operations & autograd
-│   ├── 02_neural_networks/       # Network architectures & training
-│   ├── 03_computer_vision/       # CNN models & CV applications
-│   ├── 04_natural_language_processing/ # NLP & transformer models
-│   ├── 05_generative_models/     # GANs, VAEs & generative systems
-│   ├── 06_optimization_deployment/ # Production optimization
-│   ├── 07_advanced_projects/     # Complete project implementations
-│   ├── 08_advanced_topics/       # Research-level implementations
-│   └── capstone_projects/        # Large-scale system demonstrations
-├── src/                          # Production-ready modules
-│   ├── fundamentals/             # Core tensor & autograd utilities
-│   ├── neural_networks/          # Network components & training
-│   ├── computer_vision/          # CV models & preprocessing
-│   ├── nlp/                      # NLP models & text processing
-│   ├── advanced/                 # Optimization & deployment tools
-│   └── utils/                    # Common utilities & helpers
-├── tests/                        # Comprehensive test coverage
-├── docs/                         # Technical documentation
-├── docker/                       # Container configurations
-└── .github/workflows/            # CI/CD automation
+├── notebooks/                    # 27 Jupyter notebooks with implementations
+│   ├── 01_fundamentals/          # Tensor ops, autograd, backprop visualization
+│   │   ├── 01_introduction_to_tensors.ipynb
+│   │   ├── 02_gradient_computation.ipynb
+│   │   ├── 03_custom_autograd_functions.ipynb
+│   │   └── 04_backpropagation_visualization.ipynb
+│   ├── 02_neural_networks/       # MLP, advanced architectures, training
+│   │   ├── 05_mlp_from_scratch.ipynb
+│   │   ├── 06_advanced_architectures.ipynb
+│   │   └── 07_training_techniques.ipynb
+│   ├── 03_computer_vision/       # CNN, vision architectures
+│   │   ├── 08_cnn_fundamentals.ipynb
+│   │   ├── 09_modern_cnn_architectures.ipynb
+│   │   └── 10_computer_vision_projects.ipynb
+│   ├── 04_natural_language_processing/ # RNN, LSTM, Transformers
+│   │   ├── 11_rnn_lstm_fundamentals.ipynb
+│   │   ├── 12_sequence_to_sequence.ipynb
+│   │   ├── 13_sentiment_analysis_project.ipynb
+│   │   └── 14_transformer_from_scratch.ipynb
+│   ├── 05_generative_models/     # GANs, VAEs
+│   │   ├── 15_gan_fundamentals.ipynb
+│   │   └── 16_advanced_gans_vaes.ipynb
+│   └── 06_optimization_deployment/ # Model optimization
+│       └── 17_model_optimization.ipynb
+├── src/                          # Reusable source code modules
+│   ├── fundamentals/             # Tensor utilities and autograd helpers
+│   │   ├── tensor_ops.py
+│   │   ├── autograd_helpers.py
+│   │   └── math_utils.py
+│   ├── neural_networks/          # Network components and training loops
+│   │   ├── layers.py
+│   │   ├── models.py
+│   │   ├── optimizers.py
+│   │   └── training.py
+│   ├── computer_vision/          # Vision models and utilities
+│   │   ├── models.py
+│   │   ├── augmentation.py
+│   │   ├── datasets.py
+│   │   └── transforms.py
+│   ├── nlp/                      # NLP models and utilities
+│   │   ├── models.py
+│   │   └── embeddings.py
+│   └── utils/                    # Common utilities
+├── tests/                        # Unit and integration tests
+├── requirements.txt              # Dependencies
+├── setup.py                      # Package configuration
+├── LICENSE                       # MIT License
+└── README.md                     # This file
 ```
 
-## 🔧 Key Technical Features
+## 💡 Key Features
 
-### **Modular Architecture**
+### **Comprehensive Coverage**
+- 27 detailed Jupyter notebooks spanning beginner to advanced topics
+- Each notebook includes theory, implementation, and practical examples
+- Modular code in `src/` for reuse and reference
 
-- Clean separation of concerns across domain-specific modules
-- Reusable components with consistent interfaces
-- Production-ready code organization
+### **Learning-Focused Design**
+- Well-commented code explaining PyTorch concepts
+- Progressive difficulty from fundamentals to advanced topics
+- Each notebook builds on previous concepts
 
-### **Comprehensive Implementation Coverage**
+### **Implementation Patterns**
+- Clean, readable code following PyTorch best practices
+- Reusable classes and functions for common tasks
+- Documented design choices and architecture decisions
 
-- 27+ detailed notebook demonstrations spanning core concepts to advanced applications
-- Complete project implementations showcasing end-to-end workflows
-- Research-level implementations of state-of-the-art techniques
+### **Educational Value**
+- Understand how to implement models from first principles
+- Learn PyTorch APIs and their proper usage
+- See how different components fit together
 
-### **Production Engineering**
+## 🎓 Learning Path
 
-- Docker containerization for consistent deployment environments
-- Automated CI/CD pipelines with comprehensive testing
-- Model optimization and deployment utilities
-- MLOps monitoring and observability tools
+**Recommended order for learning:**
 
-### **Code Quality Standards**
+1. **Fundamentals** (Notebooks 1-4): Master PyTorch basics
+   - Tensor operations and properties
+   - Automatic differentiation and gradients
+   - Custom autograd functions
 
-- Extensive test coverage across all modules
-- Type hints and comprehensive documentation
-- Automated code quality checks and formatting
+2. **Neural Networks** (Notebooks 5-7): Build essential models
+   - Implement MLPs from scratch
+   - Understand modern architectures
+   - Learn training strategies
 
-## 📊 Implementation Highlights
+3. **Computer Vision** (Notebooks 8-10): Vision models
+   - CNN fundamentals
+   - Advanced architectures (ResNet, EfficientNet, etc.)
+   - Practical CV implementations
 
-### Core Fundamentals
+4. **Natural Language Processing** (Notebooks 11-14): NLP models
+   - RNNs and LSTMs
+   - Sequence-to-sequence models
+   - Transformers from scratch
 
-- Custom autograd function implementations
-- Advanced tensor manipulation utilities
-- Backpropagation visualization and analysis
+5. **Generative Models** (Notebooks 15-16): Advanced topics
+   - GAN implementations
+   - VAE architectures
+   - Training techniques for generative models
 
-### Neural Network Systems
+6. **Optimization** (Notebook 17): Production considerations
+   - Model optimization techniques
+   - Efficient implementations
+   - Performance improvements
 
-- From-scratch MLP implementations
-- Modern architecture designs (ResNet, Transformer variants)
-- Advanced training techniques and optimization strategies
+## 🚀 Getting Started
 
-### Computer Vision Pipeline
-
-- CNN architecture implementations
-- Data augmentation and preprocessing pipelines
-- Production-ready image classification systems
-
-### NLP & Language Models
-
-- RNN/LSTM implementations with attention mechanisms
-- Sequence-to-sequence model architectures
-- Transformer implementations from foundational principles
-
-### Generative Model Portfolio
-
-- GAN architecture variations and training strategies
-- VAE implementations with different posterior approximations
-- Advanced generative modeling techniques
-
-### Production Deployment Systems
-
-- Model compression and optimization techniques
-- REST API development for model serving
-- MLOps pipeline implementations
-- Cloud deployment automation
-
-## 🧪 Testing & Validation
+### Open Notebooks
 
 ```bash
-# Execute full test suite
+jupyter notebook notebooks/01_fundamentals/
+```
+
+Start with notebook 1 and progress sequentially through each section.
+
+### Using Source Code
+
+Import modules for your own projects:
+
+```python
+from src.fundamentals.tensor_ops import create_tensor, advanced_operations
+from src.neural_networks.models import MLP, train_model
+from src.computer_vision.models import CNN
+from src.nlp.models import RNNTextClassifier
+```
+
+### Running Tests
+
+```bash
 python -m pytest tests/
-
-# Run domain-specific tests
-python -m pytest tests/test_computer_vision/
-python -m pytest tests/test_nlp/
-
-# Generate coverage reports
-python -m pytest tests/ --cov=src --cov-report=html
 ```
 
-## 📖 Documentation
+## 📝 Code Examples
 
-Complete technical documentation: [https://satvikpraveen.github.io/PyTorch-Mastery-Hub/](https://satvikpraveen.github.io/PyTorch-Mastery-Hub/)
-
-Build documentation locally:
-
-```bash
-cd docs/
-pip install -r requirements.txt
-mkdocs serve
-```
-
-## 💡 Usage Examples
-
-### Tensor Operations
+### Basic Tensor Operations
 
 ```python
 import torch
-from src.fundamentals.tensor_ops import create_tensor, advanced_operations
+from src.fundamentals.tensor_ops import create_tensor
 
-# Custom tensor creation with gradient tracking
-x = create_tensor([1.0, 2.0, 3.0, 4.0], requires_grad=True)
-result = advanced_operations(x)
+# Create tensor with gradient tracking
+x = create_tensor([1.0, 2.0, 3.0], requires_grad=True)
+y = x ** 2
+loss = y.sum()
+loss.backward()
+print(x.grad)
 ```
 
-### Neural Network Implementation
+### Simple Neural Network
 
 ```python
-from src.neural_networks.models import AdvancedMLP
-from src.neural_networks.training import TrainingPipeline
+from src.neural_networks.models import SimpleMLP
+import torch.optim as optim
 
-# Initialize architecture
-model = AdvancedMLP(input_dim=784, hidden_dims=[512, 256, 128], output_dim=10)
+# Create model
+model = SimpleMLP(input_dim=784, hidden_dims=[256, 128], output_dim=10)
 
-# Configure training pipeline
-pipeline = TrainingPipeline(
-    model=model,
-    optimizer_type='adamw',
-    scheduler_type='cosine_annealing',
-    loss_fn='cross_entropy'
-)
+# Setup training
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+loss_fn = torch.nn.CrossEntropyLoss()
+
+# Training loop
+for epoch in range(10):
+    output = model(x)
+    loss = loss_fn(output, y)
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
 ```
 
-### Computer Vision System
+### CNN Implementation
 
 ```python
-from src.computer_vision.models import ModernCNN
-from src.computer_vision.transforms import get_transform_pipeline
+from src.computer_vision.models import SimpleCNN
 
-# Load pre-configured architecture
-model = ModernCNN(architecture='efficientnet_b0', num_classes=1000)
+# Create CNN model
+model = SimpleCNN(num_classes=10)
 
-# Apply preprocessing pipeline
-transform = get_transform_pipeline(mode='inference', image_size=224)
+# Forward pass
+output = model(images)
 ```
 
-### NLP Implementation
+### LSTM Text Classification
 
 ```python
-from src.nlp.models import TransformerEncoder
-from src.nlp.tokenization import AdvancedTokenizer
+from src.nlp.models import LSTMClassifier
 
-# Initialize transformer components
-encoder = TransformerEncoder(
-    d_model=512,
-    nhead=8,
-    num_layers=6,
-    dim_feedforward=2048
-)
+# Create LSTM model
+model = LSTMClassifier(vocab_size=10000, embedding_dim=128, hidden_dim=256)
 
-tokenizer = AdvancedTokenizer(vocab_size=50000)
+# Process sequences
+output = model(sequences)
 ```
 
-## 🎯 Project Demonstrations
+## 📚 Dependencies
 
-The repository includes several complete system implementations:
+**Core:**
+- PyTorch >= 2.0.0
+- NumPy >= 1.21.0
 
-**Image Classification Pipeline**: End-to-end computer vision system with data preprocessing, model training, evaluation, and deployment components.
+**Data & ML:**
+- Pandas >= 1.3.0
+- scikit-learn >= 0.24.0
 
-**Sentiment Analysis System**: Complete NLP pipeline featuring transformer-based models with custom tokenization and inference optimization.
+**Visualization:**
+- Matplotlib >= 3.4.0
+- Seaborn >= 0.11.0
 
-**Generative Image System**: GAN-based architecture for high-quality image generation with training stability improvements and evaluation metrics.
+**Testing:**
+- pytest >= 7.0.0
 
-**Recommendation Engine**: Collaborative filtering system with deep learning components and production-ready serving infrastructure.
+See `requirements.txt` for exact versions.
 
-**Multimodal AI System**: Combined vision-language model implementation demonstrating cross-modal learning and inference.
+## ❓ FAQ
 
-**MLOps Production Pipeline**: Complete machine learning operations workflow with model versioning, monitoring, and automated deployment.
+**Q: Can I use this code in my projects?**
+A: Yes! All code is MIT licensed and free to use and modify.
 
-## 🛠️ Technical Stack
+**Q: Should I memorize all the code?**
+A: No, focus on understanding the patterns and concepts. Use this as a reference.
 
-### Core Dependencies
+**Q: In what order should I study?**
+A: Follow the numbered notebooks (01 → 27). Each builds on previous knowledge.
 
-```
-PyTorch >= 2.0.0
-torchvision >= 0.15.0
-torchaudio >= 2.0.0
-numpy >= 1.21.0
-```
+**Q: Can I skip some notebooks?**
+A: Fundamentals (1-4) and Neural Networks (5-7) are essential. Others can be explored based on interest.
 
-### Development Tools
+**Q: Do I need a GPU?**
+A: No, but it makes training faster. All code works on CPU.
 
-```
-pytest >= 7.0.0
-black >= 22.0.0
-flake8 >= 4.0.0
-mypy >= 0.950
-```
+**Q: How do I apply this to my own projects?**
+A: Copy patterns from `src/` modules and adapt them to your problem.
 
-### Production Dependencies
-
-```
-fastapi >= 0.95.0
-docker >= 6.0.0
-prometheus-client >= 0.16.0
-```
-
-See [requirements.txt](requirements.txt) for complete dependency specifications.
-
-## 🔄 Continuous Integration
-
-The project implements automated workflows for:
-
-- **Code Quality**: Linting, formatting, and type checking
-- **Testing**: Unit tests, integration tests, and performance benchmarks
-- **Documentation**: Automated documentation generation and deployment
-- **Security**: Dependency vulnerability scanning
-
-## 📈 Performance Metrics
-
-The implementations include comprehensive benchmarking and performance analysis:
-
-- Model accuracy and convergence analysis
-- Training time and resource utilization metrics
-- Inference latency and throughput measurements
-- Memory efficiency optimization results
-
-## 🐛 Issues & Support
-
-For technical issues or questions:
-
-1. Review the comprehensive [documentation](https://satvikpraveen.github.io/PyTorch-Mastery-Hub/)
-2. Check existing [GitHub Issues](https://github.com/SatvikPraveen/PyTorch-Mastery-Hub/issues)
-3. Submit detailed issue reports with reproducible examples
-
-## 📜 License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔗 Additional Resources
+## 🤝 Contributing
 
-- [PyTorch Documentation](https://pytorch.org/docs/)
-- [Technical Blog Posts](https://satvikpraveen.github.io/PyTorch-Mastery-Hub/blog/)
-- [Implementation Deep Dives](https://satvikpraveen.github.io/PyTorch-Mastery-Hub/technical/)
+This is a personal learning reference. For issues or suggestions, open a GitHub issue or submit a pull request.
 
 ---
 
-**A comprehensive demonstration of modern PyTorch development practices and advanced machine learning implementations.**
+**A comprehensive learning resource for PyTorch and deep learning implementation.**
