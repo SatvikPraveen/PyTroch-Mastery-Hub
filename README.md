@@ -79,8 +79,21 @@ PyTorch-Mastery-Hub/
 │   ├── 05_generative_models/     # GANs, VAEs
 │   │   ├── 15_gan_fundamentals.ipynb
 │   │   └── 16_advanced_gans_vaes.ipynb
-│   └── 06_optimization_deployment/ # Model optimization
-│       └── 17_model_optimization.ipynb
+│   ├── 06_optimization_deployment/ # Model optimization, serving, MLOps
+│   │   ├── 17_model_optimization.ipynb
+│   │   ├── 18_model_serving_apis.ipynb
+│   │   ├── 19_monitoring_mlops.ipynb
+│   │   └── 20_cloud_deployment.ipynb
+│   ├── 07_advanced_projects/     # Complete practical implementations
+│   │   ├── 21_image_classification_project.ipynb
+│   │   ├── 22_text_generation_project.ipynb
+│   │   └── 23_recommendation_system.ipynb
+│   ├── 08_advanced_topics/       # Research-level implementations
+│   │   ├── 24_advanced_techniques.ipynb
+│   │   └── 25_research_applications.ipynb
+│   └── capstone_projects/        # Large-scale system demonstrations
+│       ├── 26_Capstone_part1_multimodal_system.ipynb
+│       └── 27_Capstone_part2_production_mlops.ipynb
 ├── src/                          # Reusable source code modules
 │   ├── fundamentals/             # Tensor utilities and autograd helpers
 │   │   ├── tensor_ops.py
@@ -98,8 +111,18 @@ PyTorch-Mastery-Hub/
 │   │   └── transforms.py
 │   ├── nlp/                      # NLP models and utilities
 │   │   ├── models.py
-│   │   └── embeddings.py
-│   └── utils/                    # Common utilities
+│   │   ├── embeddings.py
+│   │   ├── tokenization.py
+│   │   └── text_utils.py
+│   ├── advanced/                 # Advanced techniques and optimization
+│   │   ├── deployment.py
+│   │   ├── optimization.py
+│   │   └── gan_utils.py
+│   └── utils/                    # Common utilities and helpers
+│       ├── data_utils.py
+│       ├── io_utils.py
+│       ├── metrics.py
+│       └── visualization.py
 ├── tests/                        # Unit and integration tests
 ├── requirements.txt              # Dependencies
 ├── setup.py                      # Package configuration
@@ -137,6 +160,7 @@ PyTorch-Mastery-Hub/
    - Tensor operations and properties
    - Automatic differentiation and gradients
    - Custom autograd functions
+   - Backpropagation visualization
 
 2. **Neural Networks** (Notebooks 5-7): Build essential models
    - Implement MLPs from scratch
@@ -151,6 +175,7 @@ PyTorch-Mastery-Hub/
 4. **Natural Language Processing** (Notebooks 11-14): NLP models
    - RNNs and LSTMs
    - Sequence-to-sequence models
+   - Sentiment analysis systems
    - Transformers from scratch
 
 5. **Generative Models** (Notebooks 15-16): Advanced topics
@@ -158,10 +183,24 @@ PyTorch-Mastery-Hub/
    - VAE architectures
    - Training techniques for generative models
 
-6. **Optimization** (Notebook 17): Production considerations
+6. **Optimization & Deployment** (Notebooks 17-20): Production considerations
    - Model optimization techniques
-   - Efficient implementations
-   - Performance improvements
+   - Model serving and APIs
+   - MLOps and monitoring
+   - Cloud deployment
+
+7. **Advanced Projects** (Notebooks 21-23): Practical implementations
+   - Image classification systems
+   - Text generation projects
+   - Recommendation systems
+
+8. **Advanced Topics & Research** (Notebooks 24-25): Cutting-edge techniques
+   - Advanced training techniques
+   - Research-level implementations
+
+9. **Capstone Projects** (Notebooks 26-27): Complete systems
+   - Multimodal AI systems
+   - Production MLOps pipelines
 
 ## 🚀 Getting Started
 
