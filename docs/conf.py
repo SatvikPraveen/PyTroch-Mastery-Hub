@@ -104,7 +104,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 # Source suffix
 source_suffix = {
     '.rst': None,
-    '.md': 'myst_parser',
 }
 
 # Master document
