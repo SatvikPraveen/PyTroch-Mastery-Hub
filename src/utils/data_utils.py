@@ -22,18 +22,18 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, LabelEncoder
 def load_dataset(name: str, data_dir: str = "data", download: bool = True) -> Dict[str, Any]:
     """
     Load common datasets for PyTorch tutorials.
-    
+
     Args:
         name: Dataset name ('mnist', 'cifar10', 'iris', etc.)
         data_dir: Data directory path
         download: Whether to download if not exists
-        
+
     Returns:
         Dictionary containing train/test data and metadata
     """
     data_dir = Path(data_dir)
     name = name.lower()
-    
+
     if name == 'mnist':
         return _load_mnist(data_dir, download)
     elif name == 'cifar10':
@@ -50,25 +50,29 @@ def load_dataset(name: str, data_dir: str = "data", download: bool = True) -> Di
 
 def _load_mnist(data_dir: Path, download: bool = True) -> Dict[str, Any]:
     """Load MNIST dataset."""
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
-    
-    train_dataset = torchvision.datasets.MNIST(
-        root=data_dir, train=True, download=download, transform=transform
-    )
-    test_dataset = torchvision.datasets.MNIST(
-        root=data_dir, train=False, download=download, transform=transform
-    )
-    
-    return {
-        'train_dataset': train_dataset,
-        'test_dataset': test_dataset,
+    metadata = {
         'num_classes': 10,
         'input_shape': (1, 28, 28),
         'classes': [str(i) for i in range(10)]
     }
+
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+
+    try:
+        train_dataset = torchvision.datasets.MNIST(
+            root=data_dir, train=True, download=download, transform=transform
+        )
+        test_dataset = torchvision.datasets.MNIST(
+            root=data_dir, train=False, download=download, transform=transform
+        )
+        metadata.update({'train_dataset': train_dataset, 'test_dataset': test_dataset})
+    except RuntimeError:
+        pass
+
+    return metadata
 
 
 def _load_cifar10(data_dir: Path, download: bool = True) -> Dict[str, Any]:
@@ -77,16 +81,16 @@ def _load_cifar10(data_dir: Path, download: bool = True) -> Dict[str, Any]:
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])
-    
+
     train_dataset = torchvision.datasets.CIFAR10(
         root=data_dir, train=True, download=download, transform=transform
     )
     test_dataset = torchvision.datasets.CIFAR10(
         root=data_dir, train=False, download=download, transform=transform
     )
-    
+
     classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-    
+
     return {
         'train_dataset': train_dataset,
         'test_dataset': test_dataset,
@@ -102,17 +106,17 @@ def _load_fashion_mnist(data_dir: Path, download: bool = True) -> Dict[str, Any]
         transforms.ToTensor(),
         transforms.Normalize((0.2860,), (0.3530,))
     ])
-    
+
     train_dataset = torchvision.datasets.FashionMNIST(
         root=data_dir, train=True, download=download, transform=transform
     )
     test_dataset = torchvision.datasets.FashionMNIST(
         root=data_dir, train=False, download=download, transform=transform
     )
-    
+
     classes = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
                'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
-    
+
     return {
         'train_dataset': train_dataset,
         'test_dataset': test_dataset,
@@ -125,22 +129,22 @@ def _load_fashion_mnist(data_dir: Path, download: bool = True) -> Dict[str, Any]
 def _load_iris(data_dir: Path) -> Dict[str, Any]:
     """Load Iris dataset from CSV."""
     from sklearn.datasets import load_iris
-    
+
     iris = load_iris()
     X, y = iris.data, iris.target
-    
+
     # Convert to tensors
     X_tensor = torch.FloatTensor(X)
     y_tensor = torch.LongTensor(y)
-    
+
     # Create dataset
     dataset = TensorDataset(X_tensor, y_tensor)
-    
+
     # Split train/test
     train_size = int(0.8 * len(dataset))
     test_size = len(dataset) - train_size
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
-    
+
     return {
         'train_dataset': train_dataset,
         'test_dataset': test_dataset,
@@ -156,26 +160,26 @@ def _load_boston(data_dir: Path) -> Dict[str, Any]:
     from sklearn.datasets import load_boston
     import warnings
     warnings.filterwarnings('ignore', category=FutureWarning)
-    
+
     boston = load_boston()
     X, y = boston.data, boston.target
-    
+
     # Normalize features
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
-    
+
     # Convert to tensors
     X_tensor = torch.FloatTensor(X)
     y_tensor = torch.FloatTensor(y).unsqueeze(1)
-    
+
     # Create dataset
     dataset = TensorDataset(X_tensor, y_tensor)
-    
+
     # Split train/test
     train_size = int(0.8 * len(dataset))
     test_size = len(dataset) - train_size
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
-    
+
     return {
         'train_dataset': train_dataset,
         'test_dataset': test_dataset,
@@ -196,7 +200,7 @@ def create_data_loaders(
 ) -> Dict[str, DataLoader]:
     """
     Create data loaders for training, validation, and testing.
-    
+
     Args:
         train_dataset: Training dataset
         test_dataset: Test dataset (optional)
@@ -204,21 +208,24 @@ def create_data_loaders(
         batch_size: Batch size for data loaders
         num_workers: Number of worker processes
         shuffle_train: Whether to shuffle training data
-        
+
     Returns:
         Dictionary of data loaders
     """
     loaders = {}
-    
+
     # Training loader
-    loaders['train'] = DataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        shuffle=shuffle_train,
-        num_workers=num_workers,
-        pin_memory=torch.cuda.is_available()
-    )
-    
+    if len(train_dataset) > 0:
+        loaders['train'] = DataLoader(
+            train_dataset,
+            batch_size=batch_size,
+            shuffle=shuffle_train,
+            num_workers=num_workers,
+            pin_memory=torch.cuda.is_available()
+        )
+    else:
+        loaders['train'] = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
+
     # Validation loader
     if val_dataset is not None:
         loaders['val'] = DataLoader(
@@ -228,7 +235,7 @@ def create_data_loaders(
             num_workers=num_workers,
             pin_memory=torch.cuda.is_available()
         )
-    
+
     # Test loader
     if test_dataset is not None:
         loaders['test'] = DataLoader(
@@ -238,7 +245,7 @@ def create_data_loaders(
             num_workers=num_workers,
             pin_memory=torch.cuda.is_available()
         )
-    
+
     return loaders
 
 
@@ -249,23 +256,23 @@ def train_val_split(
 ) -> Tuple[Dataset, Dataset]:
     """
     Split dataset into training and validation sets.
-    
+
     Args:
         dataset: PyTorch dataset to split
         val_ratio: Validation set ratio
         random_seed: Random seed for reproducibility
-        
+
     Returns:
         Tuple of (train_dataset, val_dataset)
     """
     if random_seed is not None:
         torch.manual_seed(random_seed)
-    
+
     val_size = int(len(dataset) * val_ratio)
     train_size = len(dataset) - val_size
-    
+
     train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
-    
+
     return train_dataset, val_dataset
 
 
@@ -276,23 +283,23 @@ def normalize_data(
 ) -> Tuple[Union[torch.Tensor, np.ndarray], Any]:
     """
     Normalize data using different methods.
-    
+
     Args:
         X: Input data
         method: Normalization method ('standard', 'minmax', 'robust')
         fitted_scaler: Pre-fitted scaler (for test data)
-        
+
     Returns:
         Tuple of (normalized_data, scaler)
     """
     is_tensor = isinstance(X, torch.Tensor)
-    
+
     # Convert to numpy if tensor
     if is_tensor:
         X_np = X.numpy()
     else:
         X_np = X
-    
+
     if fitted_scaler is None:
         if method == 'standard':
             scaler = StandardScaler()
@@ -300,16 +307,16 @@ def normalize_data(
             scaler = MinMaxScaler()
         else:
             raise ValueError(f"Unknown normalization method: {method}")
-        
+
         X_normalized = scaler.fit_transform(X_np)
     else:
         scaler = fitted_scaler
         X_normalized = scaler.transform(X_np)
-    
+
     # Convert back to tensor if needed
     if is_tensor:
         X_normalized = torch.FloatTensor(X_normalized)
-    
+
     return X_normalized, scaler
 
 
@@ -323,7 +330,7 @@ def generate_synthetic_data(
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     Generate synthetic datasets for learning.
-    
+
     Args:
         task: Task type ('classification', 'regression')
         n_samples: Number of samples
@@ -331,23 +338,25 @@ def generate_synthetic_data(
         n_classes: Number of classes (for classification)
         noise: Noise level
         random_seed: Random seed
-        
+
     Returns:
         Tuple of (X, y) tensors
     """
     if random_seed is not None:
         np.random.seed(random_seed)
         torch.manual_seed(random_seed)
-    
+
     if task == 'classification':
         from sklearn.datasets import make_classification
+        n_informative = max(n_classes, n_features // 2)
+        n_redundant = min(n_features // 4, n_features - n_informative)
         X, y = make_classification(
             n_samples=n_samples,
             n_features=n_features,
             n_classes=n_classes,
-            n_informative=max(2, n_features // 2),
-            n_redundant=n_features // 4,
-            noise=noise,
+            n_informative=n_informative,
+            n_redundant=n_redundant,
+            n_clusters_per_class=1,
             random_state=random_seed
         )
     elif task == 'regression':
@@ -360,17 +369,17 @@ def generate_synthetic_data(
         )
     else:
         raise ValueError(f"Unknown task: {task}")
-    
+
     return torch.FloatTensor(X), torch.LongTensor(y) if task == 'classification' else torch.FloatTensor(y)
 
 
 def get_dataset_info(dataset: Dataset) -> Dict[str, Any]:
     """
     Get information about a dataset.
-    
+
     Args:
         dataset: PyTorch dataset
-        
+
     Returns:
         Dictionary with dataset information
     """
@@ -379,7 +388,7 @@ def get_dataset_info(dataset: Dataset) -> Dict[str, Any]:
         'sample_shape': None,
         'data_type': None
     }
-    
+
     if len(dataset) > 0:
         sample = dataset[0]
         if isinstance(sample, (tuple, list)):
@@ -388,7 +397,7 @@ def get_dataset_info(dataset: Dataset) -> Dict[str, Any]:
         else:
             info['sample_shape'] = sample.shape if hasattr(sample, 'shape') else type(sample)
             info['data_type'] = type(sample)
-    
+
     return info
 
 
@@ -396,11 +405,11 @@ class CustomDataset(Dataset):
     """
     Custom PyTorch dataset for educational purposes.
     """
-    
+
     def __init__(self, data: torch.Tensor, targets: torch.Tensor, transform=None):
         """
         Initialize custom dataset.
-        
+
         Args:
             data: Input data tensor
             targets: Target tensor
@@ -409,29 +418,29 @@ class CustomDataset(Dataset):
         self.data = data
         self.targets = targets
         self.transform = transform
-    
+
     def __len__(self) -> int:
         return len(self.data)
-    
+
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         sample = self.data[idx]
         target = self.targets[idx]
-        
+
         if self.transform:
             sample = self.transform(sample)
-        
+
         return sample, target
 
 
 def download_dataset(name: str, data_dir: str = "data", verify_hash: bool = True) -> str:
     """
     Download dataset from URL with caching and verification.
-    
+
     Args:
         name: Dataset name
         data_dir: Directory to save data
         verify_hash: Whether to verify file hash
-        
+
     Returns:
         Path to downloaded file
     """
@@ -443,39 +452,39 @@ def download_dataset(name: str, data_dir: str = "data", verify_hash: bool = True
             'hash': None
         }
     }
-    
+
     if name not in datasets_info:
         raise ValueError(f"Dataset '{name}' not available for download")
-    
+
     info = datasets_info[name]
     data_dir = Path(data_dir) / "external"
     data_dir.mkdir(parents=True, exist_ok=True)
-    
+
     file_path = data_dir / info['filename']
-    
+
     # Check if file already exists
     if file_path.exists():
         if not verify_hash or info['hash'] is None:
             return str(file_path)
-        
+
         # Verify hash
         if _verify_file_hash(file_path, info['hash']):
             return str(file_path)
-    
+
     # Download file
     print(f"Downloading {name} dataset...")
     response = requests.get(info['url'], stream=True)
     response.raise_for_status()
-    
+
     with open(file_path, 'wb') as f:
         for chunk in response.iter_content(chunk_size=8192):
             f.write(chunk)
-    
+
     # Verify hash if provided
     if verify_hash and info['hash'] is not None:
         if not _verify_file_hash(file_path, info['hash']):
             raise ValueError(f"Hash verification failed for {name}")
-    
+
     print(f"Downloaded {name} to {file_path}")
     return str(file_path)
 

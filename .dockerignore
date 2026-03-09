@@ -1,0 +1,60 @@
+# .dockerignore — files excluded from the Docker build context
+
+# Version control
+.git
+.gitignore
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Testing artifacts
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+.tox/
+
+# IDE files
+.vscode/
+.idea/
+
+# Documentation build
+docs/_build/
+
+# Output artifacts (mount as volumes instead)
+outputs/
+models/
+data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Logs
+*.log
+wandb/
+mlruns/
+lightning_logs/
+
+# Model weights (mount or download at runtime)
+*.pt
+*.pth
+*.ckpt

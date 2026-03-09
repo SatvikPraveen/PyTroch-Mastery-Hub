@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # CPU-only development environment
+  pytorch-hub-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pytorch-mastery-hub-cpu
+    image: pytorch-mastery-hub:cpu
+    volumes:
+      - .:/workspace
+      - pytorch-data:/workspace/data
+      - pytorch-models:/workspace/models
+      - pytorch-outputs:/workspace/outputs
+    ports:
+      - "8888:8888"  # Jupyter
+      - "6006:6006"  # TensorBoard
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+    profiles:
+      - cpu
+
+  # GPU-enabled development environment
+  pytorch-hub-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    container_name: pytorch-mastery-hub-gpu
+    image: pytorch-mastery-hub:gpu
+    volumes:
+      - .:/workspace
+      - pytorch-data:/workspace/data
+      - pytorch-models:/workspace/models
+      - pytorch-outputs:/workspace/outputs
+    ports:
+      - "8888:8888"  # Jupyter
+      - "6006:6006"  # TensorBoard
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+    profiles:
+      - gpu
+
+  # Standalone training service
+  training:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pytorch-training
+    volumes:
+      - .:/workspace
+      - pytorch-data:/workspace/data
+      - pytorch-models:/workspace/models
+      - pytorch-outputs:/workspace/outputs
+    environment:
+      - PYTHONPATH=/workspace
+    command: python -m src.utils.cli train --config config.yaml
+    profiles:
+      - training
+
+  # TensorBoard service
+  tensorboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pytorch-tensorboard
+    volumes:
+      - pytorch-outputs:/workspace/outputs
+    ports:
+      - "6006:6006"
+    command: tensorboard --logdir=/workspace/outputs/logs --host=0.0.0.0 --port=6006
+    profiles:
+      - monitoring
+
+volumes:
+  pytorch-data:
+    driver: local
+  pytorch-models:
+    driver: local
+  pytorch-outputs:
+    driver: local
+
+networks:
+  default:
+    name: pytorch-network

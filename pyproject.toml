@@ -1,0 +1,232 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pytorch-mastery-hub"
+version = "1.0.0"
+description = "Comprehensive PyTorch learning resource with hands-on examples"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "PyTorch Mastery Hub Contributors", email = "your-email@example.com"}
+]
+maintainers = [
+    {name = "PyTorch Mastery Hub Contributors", email = "your-email@example.com"}
+]
+keywords = [
+    "pytorch",
+    "machine-learning",
+    "deep-learning",
+    "education",
+    "tutorials",
+    "neural-networks",
+    "computer-vision",
+    "nlp"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "torchaudio>=2.0.0",
+    "numpy>=1.21.0",
+    "scipy>=1.7.0",
+    "pandas>=1.3.0",
+    "scikit-learn>=1.0.0",
+    "matplotlib>=3.5.0",
+    "seaborn>=0.11.0",
+    "plotly>=5.0.0",
+    "tqdm>=4.62.0",
+    "pillow>=8.3.0",
+    "requests>=2.26.0",
+    "pyyaml>=5.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.2.0",
+    "pytest-cov>=2.12.0",
+    "pytest-xdist>=2.5.0",
+    "black>=21.0.0",
+    "flake8>=3.9.0",
+    "isort>=5.9.0",
+    "pre-commit>=2.15.0",
+    "mypy>=0.910",
+    "bandit>=1.7.0",
+]
+docs = [
+    "sphinx>=4.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "nbsphinx>=0.8.0",
+    "sphinx-autodoc-typehints>=1.12.0",
+    "myst-parser>=0.18.0",
+]
+notebooks = [
+    "jupyter>=1.0.0",
+    "jupyterlab>=3.0.0",
+    "ipywidgets>=7.6.0",
+    "notebook>=6.4.0",
+    "nbconvert>=6.0.0",
+    "nbformat>=5.1.0",
+]
+advanced = [
+    "transformers>=4.20.0",
+    "datasets>=2.0.0",
+    "optuna>=2.10.0",
+    "wandb>=0.12.0",
+    "lightning>=2.0.0",
+    "torchsummary>=1.5.0",
+    "torchmetrics>=0.9.0",
+]
+cv = [
+    "opencv-python>=4.5.0",
+    "albumentations>=1.2.0",
+]
+nlp = [
+    "nltk>=3.6.0",
+    "spacy>=3.4.0",
+    "tokenizers>=0.12.0",
+]
+audio = [
+    "librosa>=0.9.0",
+    "soundfile>=0.10.0",
+]
+all = [
+    "pytorch-mastery-hub[dev,docs,notebooks,advanced,cv,nlp,audio]",
+]
+
+[project.urls]
+Homepage = "https://github.com/SatvikPraveen/pytorch-mastery-hub"
+Documentation = "https://pytorch-mastery-hub.readthedocs.io/"
+Repository = "https://github.com/SatvikPraveen/pytorch-mastery-hub"
+Issues = "https://github.com/SatvikPraveen/pytorch-mastery-hub/issues"
+Changelog = "https://github.com/SatvikPraveen/pytorch-mastery-hub/blob/main/CHANGELOG.md"
+
+[project.scripts]
+pytorch-hub = "src.utils.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.md", "*.txt", "*.yml", "*.yaml"]
+
+# Black configuration
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | env
+  | build
+  | dist
+  | \.eggs
+  | notebooks
+)/
+'''
+
+# isort configuration
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip_glob = ["notebooks/*", "venv/*", "env/*"]
+
+# pytest configuration
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-ra",
+    "-v",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "gpu: marks tests that require GPU",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+
+# MyPy configuration
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+exclude = [
+    "venv",
+    "env",
+    "build",
+    "dist",
+    "notebooks",
+]
+
+# Bandit security configuration
+[tool.bandit]
+exclude_dirs = ["/tests", "/notebooks"]
+skips = ["B101", "B601"]
+
+# Flake8 configuration (in setup.cfg as flake8 doesn't support pyproject.toml yet)
+# See .flake8 file
