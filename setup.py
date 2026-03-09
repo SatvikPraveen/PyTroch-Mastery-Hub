@@ -4,15 +4,18 @@ Setup configuration for PyTorch Mastery Hub
 
 from setuptools import setup, find_packages
 import os
+from pathlib import Path
+
+HERE = Path(__file__).parent
 
 # Read README for long description
 def read_readme():
-    with open("README.md", "r", encoding="utf-8") as fh:
+    with open(HERE / "README.md", "r", encoding="utf-8") as fh:
         return fh.read()
 
 # Read requirements
 def read_requirements():
-    with open("requirements.txt", "r") as fh:
+    with open(HERE / "requirements.txt", "r") as fh:
         return [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
 setup(
