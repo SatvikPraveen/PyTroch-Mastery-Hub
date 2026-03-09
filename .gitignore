@@ -48,6 +48,8 @@ coverage.xml
 
 # Jupyter Notebook
 .ipynb_checkpoints
+notebooks/results/
+executed_test.ipynb
 
 # IPython
 profile_default/
