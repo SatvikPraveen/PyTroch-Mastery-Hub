@@ -3,13 +3,22 @@
 Pytest configuration and shared fixtures for PyTorch Mastery Hub tests
 """
 
+import sys
+import os
+from pathlib import Path
+
+# Add the src/ directory to sys.path so tests can import modules directly
+# e.g. `from neural_networks.models import ...` rather than `from src.neural_networks...`
+_ROOT = Path(__file__).parent.parent
+_SRC = _ROOT / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
 import pytest
 import torch
 import numpy as np
 from PIL import Image
-from pathlib import Path
 import tempfile
-import os
 
 
 @pytest.fixture
@@ -115,10 +124,10 @@ def set_random_seeds():
     """Set random seeds for reproducible tests."""
     torch.manual_seed(42)
     np.random.seed(42)
-    
+
     # Reset seeds after each test
     yield
-    
+
     torch.manual_seed(42)
     np.random.seed(42)
 

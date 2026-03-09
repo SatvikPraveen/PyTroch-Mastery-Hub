@@ -107,7 +107,11 @@ mlruns/
 lightning_logs/
 
 # IDE
-.vscode/
+# Allow .vscode/ settings to be tracked (useful for team setups)
+!.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
 .idea/
 *.swp
 *.swo
@@ -126,3 +130,27 @@ Thumbs.db
 *.tmp
 *.bak
 *.log
+
+# Generated outputs (keep directory structure)
+outputs/
+!outputs/.gitkeep
+models/
+!models/.gitkeep
+data/
+!data/.gitkeep
+
+# Tox
+.tox/
+
+# Docs build
+docs/_build/
+docs/api/
+
+# Docker volumes
+docker-volumes/
+
+# Bandit report
+bandit-report.json
+
+# MyPy
+.mypy_cache/

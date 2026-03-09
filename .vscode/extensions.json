@@ -1,0 +1,33 @@
+{
+    "recommendations": [
+        // Python
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "ms-python.flake8",
+        "ms-python.mypy-type-checker",
+        // Jupyter
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-renderers",
+        "ms-toolsai.vscode-jupyter-cell-tags",
+        "ms-toolsai.vscode-jupyter-slideshow",
+        // Data Science
+        "ms-toolsai.datawrangler",
+        // Docker
+        "ms-azuretools.vscode-docker",
+        // YAML
+        "redhat.vscode-yaml",
+        // Markdown
+        "yzhang.markdown-all-in-one",
+        "davidanson.vscode-markdownlint",
+        // Git
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        // Testing
+        "hbenl.vscode-test-explorer",
+        // Utilities
+        "streetsidesoftware.code-spell-checker",
+        "christian-kohler.path-intellisense",
+        "dotjoshjohnson.xml"
+    ]
+}
