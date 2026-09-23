@@ -3,11 +3,15 @@
 Fundamental PyTorch operations and utilities
 """
 
+from ..utils.device_utils import get_device, print_system_info
 from .autograd_helpers import *
 from .math_utils import *
 from .tensor_ops import *
 
 __all__ = [
+    # system
+    "get_device",
+    "print_system_info",
     # tensor_ops
     "safe_divide",
     "batch_matrix_multiply",
