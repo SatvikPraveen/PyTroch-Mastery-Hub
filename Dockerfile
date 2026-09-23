@@ -4,7 +4,7 @@ FROM python:3.12-slim
 # Metadata
 LABEL maintainer="Satvik Praveen <satvikpraveen707@gmail.com>"
 LABEL description="Development environment for PyTorch Mastery Hub"
-LABEL version="1.1.0"
+LABEL version="1.1.1"
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \

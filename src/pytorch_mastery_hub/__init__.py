@@ -3,7 +3,7 @@ PyTorch Mastery Hub - Source Package
 A comprehensive PyTorch learning resource with hands-on examples.
 """
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 __author__ = "Satvik Praveen"
 
 # Make key utilities available at package level

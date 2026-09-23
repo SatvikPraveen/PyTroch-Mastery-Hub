@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-09-23
+
+### Fixed
+- The package failed to import on Windows: `utils.memory_utils` required the POSIX-only
+  `resource` module. It is now optional, with a Win32 `GetProcessMemoryInfo` fallback.
+- `utils.data_utils.normalize_data(method="minmax")` could return values marginally above
+  1.0 in float32; the scaler now clips to the feature range.
+- Bandit findings resolved: download requests have a timeout, `serve_model` binds
+  loopback by default, `load_model`/`load_checkpoint` use `torch.load(weights_only=True)`.
+- mypy targets Python 3.12 semantics so numpy >= 2.5 stubs type-check; runtime 3.10
+  support is unchanged.
+
+### Changed
+- GitHub Actions dependencies bumped (checkout v7, setup-python v7, artifacts v7/v8,
+  codecov v7, CodeQL v4, gh-release v3).
+- The PyPI publish job runs only when the `PYPI_PUBLISH` repository variable is `true`.
+
 ## [1.1.0] - 2026-09-23
 
 ### Added

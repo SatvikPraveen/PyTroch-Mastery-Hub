@@ -4,7 +4,7 @@ FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 # Metadata
 LABEL maintainer="Satvik Praveen <satvikpraveen707@gmail.com>"
 LABEL description="GPU-enabled development environment for PyTorch Mastery Hub"
-LABEL version="1.1.0"
+LABEL version="1.1.1"
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
