@@ -7,11 +7,30 @@ sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("../src"))
 
 # -- Project information ------------------------------------------------
+import ast as _ast
+
 project = "PyTorch Mastery Hub"
-copyright = "2026, PyTorch Mastery Hub Contributors"
-author = "PyTorch Mastery Hub Contributors"
-release = "1.0.0"
-version = "1.0"
+copyright = "2026, Satvik Praveen"
+author = "Satvik Praveen"
+
+
+def _read_version() -> str:
+    """Read __version__ without importing the package (torch is mocked here)."""
+    init = os.path.join(
+        os.path.dirname(__file__), "..", "src", "pytorch_mastery_hub", "__init__.py"
+    )
+    with open(init, encoding="utf-8") as fh:
+        for node in _ast.walk(_ast.parse(fh.read())):
+            if (
+                isinstance(node, _ast.Assign)
+                and getattr(node.targets[0], "id", None) == "__version__"
+            ):
+                return str(node.value.value)
+    return "0.0.0"
+
+
+release = _read_version()
+version = ".".join(release.split(".")[:2])
 
 # -- General configuration ---------------------------------------------
 extensions = [
@@ -33,7 +52,7 @@ autosummary_generate = True
 autosummary_imported_members = True
 
 # Napoleon settings (for NumPy docstrings)
-napoleon_google_docstring = False
+napoleon_google_docstring = True
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = True
 napoleon_include_private_with_doc = False
@@ -49,24 +68,14 @@ napoleon_use_rtype = True
 autodoc_default_options = {
     "members": True,
     "member-order": "bysource",
-    "special-members": "__init__",
     "undoc-members": True,
     "exclude-members": "__weakref__",
     "show-inheritance": True,
 }
 autodoc_typehints = "description"
+# Core dependencies (torch, numpy, ...) are installed for the docs build so that
+# signatures and intersphinx links resolve; only heavy optional extras are mocked.
 autodoc_mock_imports = [
-    "torch",
-    "torchvision",
-    "torchaudio",
-    "numpy",
-    "scipy",
-    "pandas",
-    "sklearn",
-    "matplotlib",
-    "seaborn",
-    "plotly",
-    "PIL",
     "cv2",
     "albumentations",
     "transformers",
@@ -79,6 +88,9 @@ autodoc_mock_imports = [
     "librosa",
     "soundfile",
     "lightning",
+    "onnx",
+    "onnxruntime",
+    "torch_tensorrt",
 ]
 
 # Intersphinx mappings
@@ -126,13 +138,12 @@ master_doc = "index"
 
 # -- Options for HTML output -------------------------------------------
 html_theme = "sphinx_rtd_theme"
-html_static_path = ["_static"]
+html_static_path = []
 html_logo = None
 html_favicon = None
 html_theme_options = {
     "analytics_id": "",
     "logo_only": False,
-    "display_version": True,
     "prev_next_buttons_location": "bottom",
     "style_external_links": True,
     "vcs_pageview_mode": "",

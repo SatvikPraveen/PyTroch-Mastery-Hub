@@ -146,7 +146,6 @@ data/
 
 # Docs build
 docs/_build/
-docs/api/
 
 # Docker volumes
 docker-volumes/

@@ -1,9 +1,9 @@
 PyTorch Mastery Hub Documentation
 ====================================
 
-.. image:: https://img.shields.io/badge/python-3.8+-blue.svg
+.. image:: https://img.shields.io/badge/python-3.10+-blue.svg
    :target: https://www.python.org/downloads/
-   :alt: Python 3.8+
+   :alt: Python 3.10+
 
 .. image:: https://img.shields.io/badge/PyTorch-2.0+-red.svg
    :target: https://pytorch.org/

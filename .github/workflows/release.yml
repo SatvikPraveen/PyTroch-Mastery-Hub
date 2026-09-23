@@ -1,0 +1,96 @@
+name: Release
+
+# Tag a commit `vX.Y.Z` (matching pytorch_mastery_hub.__version__) to build,
+# verify, publish to PyPI via Trusted Publishing, and create a GitHub release.
+# PyPI publishing requires the `pypi` environment to be configured with a
+# trusted publisher for this repository (Settings > Environments).
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check tag matches package version
+        run: |
+          pkg_version=$(python -c "import ast,pathlib;src=pathlib.Path('src/pytorch_mastery_hub/__init__.py').read_text();print(next(n.value.value for n in ast.walk(ast.parse(src)) if isinstance(n,ast.Assign) and n.targets[0].id=='__version__'))")
+          tag_version="${GITHUB_REF_NAME#v}"
+          echo "package=$pkg_version tag=$tag_version"
+          test "$pkg_version" = "$tag_version"
+      - run: python -m pip install --upgrade pip build twine
+      - run: python -m build
+      - run: twine check --strict dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      PIP_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cpu
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Install the built wheel and run the test suite against it
+        run: |
+          pip install --upgrade pip
+          pip install "$(ls dist/*.whl)[dev]"
+          rm -rf src  # make sure tests import the installed wheel, not the checkout
+          pytest -n auto -p no:cacheprovider
+
+  publish-pypi:
+    needs: test
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pytorch-mastery-hub
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Extract this version's changelog section
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '
+            $0 ~ "^## \\[" v "\\]" {flag=1; next}
+            /^## \[/ && flag {exit}
+            flag {print}
+          ' CHANGELOG.md > release_notes.md
+          if [ ! -s release_notes.md ]; then echo "See CHANGELOG.md" > release_notes.md; fi
+      - uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.md
+          files: dist/*
