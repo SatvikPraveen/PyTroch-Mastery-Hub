@@ -290,22 +290,22 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
     print(f"device={device} dtype={args.dtype} iters={args.iters}")
     print(f"{'op':<24}{'size':>10}{'ms/iter':>12}{'TFLOP/s':>12}")
     for n in args.sizes:
-        a = torch.randn(n, n, device=device, dtype=dtype)
-        b = torch.randn(n, n, device=device, dtype=dtype)
+        lhs = torch.randn(n, n, device=device, dtype=dtype)
+        rhs = torch.randn(n, n, device=device, dtype=dtype)
         for _ in range(3):
-            a @ b
+            lhs @ rhs
         synchronize(device)
         t0 = time.perf_counter()
         for _ in range(args.iters):
-            a @ b
+            lhs @ rhs
         synchronize(device)
         ms = (time.perf_counter() - t0) / args.iters * 1e3
         tflops = 2 * n**3 / (ms / 1e3) / 1e12
         print(f"{'matmul':<24}{n:>10}{ms:>12.3f}{tflops:>12.2f}")
 
-    b, h, d = 8, 8, 64
+    batch, heads, head_dim = 8, 8, 64
     for seq_len in args.seq_lens:
-        q = torch.randn(b, h, seq_len, d, device=device, dtype=dtype)
+        q = torch.randn(batch, heads, seq_len, head_dim, device=device, dtype=dtype)
         for _ in range(3):
             F.scaled_dot_product_attention(q, q, q, is_causal=True)
         synchronize(device)
@@ -314,7 +314,9 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
             F.scaled_dot_product_attention(q, q, q, is_causal=True)
         synchronize(device)
         ms = (time.perf_counter() - t0) / args.iters * 1e3
-        flops = 4 * b * h * seq_len * seq_len * d  # QK^T and PV (full, not halved for causal)
+        flops = (
+            4 * batch * heads * seq_len * seq_len * head_dim
+        )  # QK^T and PV (full, not halved for causal)
         print(f"{'sdpa (causal)':<24}{seq_len:>10}{ms:>12.3f}{flops / (ms / 1e3) / 1e12:>12.2f}")
     return 0
 
