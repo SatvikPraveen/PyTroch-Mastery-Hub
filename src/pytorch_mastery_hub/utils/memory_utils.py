@@ -8,8 +8,8 @@ pipeline (data loading, forward, backward, optimizer step) allocates the most.
 
 from __future__ import annotations
 
+import ctypes
 import gc
-import resource
 import sys
 import time
 from dataclasses import asdict, dataclass
@@ -19,16 +19,50 @@ import torch
 
 from .device_utils import get_device
 
+try:  # POSIX only; Windows has no `resource` module
+    import resource
+except ImportError:  # pragma: no cover - exercised on Windows CI
+    resource = None  # type: ignore[assignment]
+
 __all__ = ["MemorySnapshot", "MemoryTracker", "clear_memory", "get_memory_usage", "tensor_bytes"]
 
 _MB = 1024**2
 
 
+def _windows_working_set_bytes() -> int:  # pragma: no cover - Windows only
+    """Current working set via psapi.GetProcessMemoryInfo (no psutil dependency)."""
+    from ctypes import wintypes
+
+    class _PMC(ctypes.Structure):
+        _fields_ = [
+            ("cb", wintypes.DWORD),
+            ("PageFaultCount", wintypes.DWORD),
+            ("PeakWorkingSetSize", ctypes.c_size_t),
+            ("WorkingSetSize", ctypes.c_size_t),
+            ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+            ("PagefileUsage", ctypes.c_size_t),
+            ("PeakPagefileUsage", ctypes.c_size_t),
+        ]
+
+    pmc = _PMC()
+    pmc.cb = ctypes.sizeof(_PMC)
+    handle = ctypes.windll.kernel32.GetCurrentProcess()  # type: ignore[attr-defined]
+    ctypes.windll.psapi.GetProcessMemoryInfo(handle, ctypes.byref(pmc), pmc.cb)  # type: ignore[attr-defined]
+    return int(pmc.WorkingSetSize)
+
+
 def _process_rss_mb() -> float:
-    """Resident set size of this process in MB (psutil-free)."""
-    usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    # ru_maxrss is bytes on macOS, kilobytes on Linux.
-    return usage / _MB if sys.platform == "darwin" else usage / 1024
+    """Resident set size of this process in MB (psutil-free, cross-platform)."""
+    if resource is not None:
+        usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        # ru_maxrss is bytes on macOS, kilobytes on Linux.
+        return usage / _MB if sys.platform == "darwin" else usage / 1024
+    if sys.platform == "win32":  # pragma: no cover
+        return _windows_working_set_bytes() / _MB
+    return 0.0  # pragma: no cover
 
 
 def get_memory_usage(device: torch.device | str | None = None) -> dict[str, float]:

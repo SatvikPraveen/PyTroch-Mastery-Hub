@@ -160,6 +160,9 @@ class TestLogging:
         for h in logger.handlers:
             h.flush()
         assert "to-file" in path.read_text()
+        for h in list(logger.handlers):  # release the file so Windows can delete temp_dir
+            h.close()
+            logger.removeHandler(h)
 
     def test_get_logger_namespacing(self):
         assert get_logger("x").name == "pytorch_mastery_hub.x"
