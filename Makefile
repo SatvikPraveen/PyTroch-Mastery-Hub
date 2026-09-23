@@ -252,7 +252,7 @@ gpu-info:  ## Print GPU information
 	$(PYTHON) -c "import torch; print(torch.cuda.get_device_properties(0) if torch.cuda.is_available() else 'No GPU available')"
 
 version:  ## Show current version
-	$(PYTHON) -c "import src; print(getattr(src, '__version__', '1.0.0'))"
+	$(PYTHON) -c "import pytorch_mastery_hub; print(pytorch_mastery_hub.__version__)"
 
 requirements-freeze:  ## Freeze current environment to requirements.txt
 	$(PIP) freeze > requirements-frozen.txt

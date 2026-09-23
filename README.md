@@ -94,7 +94,7 @@ PyTorch-Mastery-Hub/
 │   └── capstone_projects/        # Large-scale system demonstrations
 │       ├── 26_Capstone_part1_multimodal_system.ipynb
 │       └── 27_Capstone_part2_production_mlops.ipynb
-├── src/                          # Reusable source code modules
+├── src/pytorch_mastery_hub/      # Installable library (pip install -e .)
 │   ├── fundamentals/             # Tensor utilities and autograd helpers
 │   │   ├── tensor_ops.py
 │   │   ├── autograd_helpers.py
@@ -217,10 +217,10 @@ Start with notebook 1 and progress sequentially through each section.
 Import modules for your own projects:
 
 ```python
-from src.fundamentals.tensor_ops import create_tensor, advanced_operations
-from src.neural_networks.models import MLP, train_model
-from src.computer_vision.models import CNN
-from src.nlp.models import RNNTextClassifier
+from pytorch_mastery_hub.fundamentals.tensor_ops import create_tensor, advanced_operations
+from pytorch_mastery_hub.neural_networks.models import MLP, train_model
+from pytorch_mastery_hub.computer_vision.models import CNN
+from pytorch_mastery_hub.nlp.models import RNNTextClassifier
 ```
 
 ### Running Tests
@@ -235,7 +235,7 @@ python -m pytest tests/
 
 ```python
 import torch
-from src.fundamentals.tensor_ops import create_tensor
+from pytorch_mastery_hub.fundamentals.tensor_ops import create_tensor
 
 # Create tensor with gradient tracking
 x = create_tensor([1.0, 2.0, 3.0], requires_grad=True)
@@ -248,7 +248,7 @@ print(x.grad)
 ### Simple Neural Network
 
 ```python
-from src.neural_networks.models import SimpleMLP
+from pytorch_mastery_hub.neural_networks.models import SimpleMLP
 import torch.optim as optim
 
 # Create model
@@ -270,7 +270,7 @@ for epoch in range(10):
 ### CNN Implementation
 
 ```python
-from src.computer_vision.models import SimpleCNN
+from pytorch_mastery_hub.computer_vision.models import SimpleCNN
 
 # Create CNN model
 model = SimpleCNN(num_classes=10)
@@ -282,7 +282,7 @@ output = model(images)
 ### LSTM Text Classification
 
 ```python
-from src.nlp.models import LSTMClassifier
+from pytorch_mastery_hub.nlp.models import LSTMClassifier
 
 # Create LSTM model
 model = LSTMClassifier(vocab_size=10000, embedding_dim=128, hidden_dim=256)

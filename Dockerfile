@@ -36,7 +36,6 @@ RUN pip install --upgrade pip setuptools wheel
 
 # Copy requirements first for better caching
 COPY requirements.txt .
-COPY setup.py .
 COPY pyproject.toml .
 COPY README.md .
 

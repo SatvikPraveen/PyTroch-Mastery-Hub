@@ -1,7 +1,7 @@
 """
 Example: GAN Training Loop
 ============================
-Demonstrates training a simple GAN using src.advanced.gan_utils.
+Demonstrates training a simple GAN using pytorch_mastery_hub.advanced.gan_utils.
 Run: python examples/gan_training.py [--epochs 5]
 """
 
@@ -9,13 +9,13 @@ import sys
 import os
 import argparse
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.advanced.gan_utils import Generator, Discriminator, GANTrainer
+from pytorch_mastery_hub.advanced.gan_utils import Generator, Discriminator, GANTrainer
 
 
 def parse_args():

@@ -3,15 +3,10 @@
 Test runner script for PyTorch Mastery Hub
 """
 
-import pytest
-import sys
 import os
-from pathlib import Path
+import sys
 
-# Add src to Python path
-project_root = Path(__file__).parent.parent
-src_path = project_root / "src"
-sys.path.insert(0, str(src_path))
+import pytest
 
 
 def run_all_tests():
@@ -63,7 +58,7 @@ def run_coverage():
     """Run tests with coverage report."""
     return pytest.main([
         "tests/",
-        "--cov=src",
+        "--cov=pytorch_mastery_hub",
         "--cov-report=html",
         "--cov-report=term",
         "-v"

@@ -65,7 +65,7 @@ services:
       - pytorch-outputs:/workspace/outputs
     environment:
       - PYTHONPATH=/workspace
-    command: python -m src.utils.cli train --config config.yaml
+    command: pytorch-hub train --config config.yaml
     profiles:
       - training
 

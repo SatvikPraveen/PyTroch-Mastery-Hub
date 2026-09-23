@@ -2,20 +2,20 @@
 Example: Model Quantization & Pruning
 =======================================
 Demonstrates post-training quantization and magnitude pruning using
-src.advanced.optimization utilities to reduce model size.
+pytorch_mastery_hub.advanced.optimization utilities to reduce model size.
 Run: python examples/model_optimization.py
 """
 
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import torch.nn as nn
 
-from src.neural_networks.models import SimpleMLP
-from src.advanced.optimization import ModelQuantizer, ModelPruner, calculate_sparsity
+from pytorch_mastery_hub.neural_networks.models import SimpleMLP
+from pytorch_mastery_hub.advanced.optimization import ModelQuantizer, ModelPruner, calculate_sparsity
 
 
 def model_size_kb(model: nn.Module) -> float:

@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
-from utils.visualization import (
+from pytorch_mastery_hub.utils.visualization import (
     plot_training_curves, plot_tensor_as_image, plot_gradient_flow,
     plot_confusion_matrix, visualize_model_architecture
 )

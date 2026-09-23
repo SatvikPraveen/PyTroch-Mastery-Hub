@@ -2,22 +2,22 @@
 Example: Knowledge Distillation
 =================================
 Demonstrates transferring knowledge from a large teacher model to a
-smaller student model using src.advanced.optimization.KnowledgeDistillation.
+smaller student model using pytorch_mastery_hub.advanced.optimization.KnowledgeDistillation.
 Run: python examples/knowledge_distillation.py
 """
 
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.neural_networks.models import SimpleMLP
-from src.advanced.optimization import KnowledgeDistillation
-from src.utils.metrics import accuracy
+from pytorch_mastery_hub.neural_networks.models import SimpleMLP
+from pytorch_mastery_hub.advanced.optimization import KnowledgeDistillation
+from pytorch_mastery_hub.utils.metrics import accuracy
 
 
 def model_param_count(model: nn.Module) -> int:

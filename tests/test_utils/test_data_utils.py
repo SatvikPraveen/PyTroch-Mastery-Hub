@@ -7,7 +7,7 @@ import pytest
 import torch
 import numpy as np
 from torch.utils.data import TensorDataset
-from utils.data_utils import (
+from pytorch_mastery_hub.utils.data_utils import (
     load_dataset, create_data_loaders, train_val_split,
     normalize_data, generate_synthetic_data, get_dataset_info
 )

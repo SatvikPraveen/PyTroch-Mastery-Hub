@@ -6,7 +6,7 @@ Tests for tensor operations
 import pytest
 import torch
 import numpy as np
-from fundamentals.tensor_ops import (
+from pytorch_mastery_hub.fundamentals.tensor_ops import (
     safe_divide, batch_matrix_multiply, tensor_stats, tensor_summary,
     reshape_tensor, tensor_to_numpy, numpy_to_tensor, tensor_memory_usage
 )

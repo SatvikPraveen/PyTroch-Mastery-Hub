@@ -2,21 +2,21 @@
 Example: Data Augmentation (MixUp, CutMix, Mosaic)
 ====================================================
 Demonstrates the computer vision augmentation techniques from
-src.computer_vision.augmentation.
+pytorch_mastery_hub.computer_vision.augmentation.
 Run: python examples/data_augmentation.py
 """
 
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import matplotlib
 matplotlib.use("Agg")  # Non-interactive backend for script execution
 import matplotlib.pyplot as plt
 
-from src.computer_vision.augmentation import MixUp, CutMix, Mosaic
+from pytorch_mastery_hub.computer_vision.augmentation import MixUp, CutMix, Mosaic
 
 
 def show_comparison(original, augmented_dict, save_path="outputs/augmentation_demo.png"):

@@ -2,23 +2,23 @@
 Example: Transfer Learning with a Pretrained CNN
 ==================================================
 Demonstrates fine-tuning a pretrained ResNet on a custom dataset
-(simulated with synthetic data) using src.computer_vision modules.
+(simulated with synthetic data) using pytorch_mastery_hub.computer_vision modules.
 Run: python examples/transfer_learning.py
 """
 
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import torch.nn as nn
 import torchvision.models as tv_models
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.computer_vision.augmentation import MixUp
-from src.neural_networks.training import train_epoch, validate_epoch
-from src.utils.metrics import accuracy
+from pytorch_mastery_hub.computer_vision.augmentation import MixUp
+from pytorch_mastery_hub.neural_networks.training import train_epoch, validate_epoch
+from pytorch_mastery_hub.utils.metrics import accuracy
 
 
 def create_synthetic_image_data(num_train=200, num_val=50, num_classes=5, img_size=224):

@@ -1,7 +1,7 @@
 """
 Example: Train a Simple MLP on MNIST
 ======================================
-Demonstrates end-to-end training of an MLP using src/ utilities.
+Demonstrates end-to-end training of an MLP using pytorch_mastery_hub utilities.
 Run: python examples/train_mnist.py [--epochs 5] [--batch-size 64]
 """
 
@@ -10,17 +10,17 @@ import os
 import argparse
 import time
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import torch.nn as nn
 
-from src.neural_networks.models import SimpleMLP
-from src.neural_networks.training import train_epoch, validate_epoch
-from src.utils.data_utils import load_dataset
-from src.utils.metrics import accuracy
-from src.utils.io_utils import save_model
-from src.utils.visualization import plot_training_curves
+from pytorch_mastery_hub.neural_networks.models import SimpleMLP
+from pytorch_mastery_hub.neural_networks.training import train_epoch, validate_epoch
+from pytorch_mastery_hub.utils.data_utils import load_dataset
+from pytorch_mastery_hub.utils.metrics import accuracy
+from pytorch_mastery_hub.utils.io_utils import save_model
+from pytorch_mastery_hub.utils.visualization import plot_training_curves
 
 
 def parse_args():

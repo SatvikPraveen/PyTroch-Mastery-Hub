@@ -5,7 +5,7 @@ Tests for GAN utilities
 import pytest
 import torch
 import torch.nn as nn
-from advanced.gan_utils import (
+from pytorch_mastery_hub.advanced.gan_utils import (
     Generator, Discriminator, DCGAN, WGAN, WGANCritic,
     compute_gradient_penalty, GANTrainer, gan_loss
 )

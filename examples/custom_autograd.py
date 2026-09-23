@@ -2,19 +2,19 @@
 Example: Custom Autograd Functions
 =====================================
 Demonstrates how to implement and use custom backward passes via
-torch.autograd.Function. Uses helpers from src.fundamentals.autograd_helpers.
+torch.autograd.Function. Uses helpers from pytorch_mastery_hub.fundamentals.autograd_helpers.
 Run: python examples/custom_autograd.py
 """
 
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import torch.nn as nn
 
-from src.fundamentals.autograd_helpers import (
+from pytorch_mastery_hub.fundamentals.autograd_helpers import (
     LinearFunction,
     ReLUFunction,
     SigmoidFunction,

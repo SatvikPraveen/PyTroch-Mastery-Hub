@@ -8,12 +8,12 @@ Run: python examples/basic_tensors.py
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import numpy as np
 
-from src.fundamentals.tensor_ops import safe_divide, batch_matrix_multiply, tensor_stats
+from pytorch_mastery_hub.fundamentals.tensor_ops import safe_divide, batch_matrix_multiply, tensor_stats
 
 
 def main():
@@ -34,11 +34,11 @@ def main():
     print(f"   randn mean  : {randn.mean():.4f} (should be ~0)")
 
     # ── 2. Tensor statistics ─────────────────────────────────────
-    print("\n2. Tensor Statistics (via src.fundamentals.tensor_ops)")
+    print("\n2. Tensor Statistics (via pytorch_mastery_hub.fundamentals.tensor_ops)")
     x = torch.randn(100, 10)
     stats = tensor_stats(x)
     for key, val in stats.items():
-        print(f"   {key:10s}: {val:.4f}")
+        print(f"   {key:10s}: {val:.4f}" if isinstance(val, float) else f"   {key:10s}: {val}")
 
     # ── 3. Safe division ─────────────────────────────────────────
     print("\n3. Safe Division (handles zero denominator)")

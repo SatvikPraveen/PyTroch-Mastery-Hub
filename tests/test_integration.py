@@ -7,10 +7,10 @@ import pytest
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from neural_networks.models import SimpleMLP
-from neural_networks.training import train_epoch, validate_epoch
-from utils.data_utils import generate_synthetic_data
-from utils.metrics import accuracy
+from pytorch_mastery_hub.neural_networks.models import SimpleMLP
+from pytorch_mastery_hub.neural_networks.training import train_epoch, validate_epoch
+from pytorch_mastery_hub.utils.data_utils import generate_synthetic_data
+from pytorch_mastery_hub.utils.metrics import accuracy
 
 
 class TestEndToEndTraining:
@@ -107,7 +107,7 @@ class TestDataFlowIntegration:
     
     def test_data_preprocessing_to_model(self):
         """Test data flow from preprocessing to model prediction."""
-        from utils.data_utils import normalize_data, create_data_loaders
+        from pytorch_mastery_hub.utils.data_utils import normalize_data, create_data_loaders
         
         # Generate raw data
         raw_data = torch.randn(100, 8) * 10 + 5  # Non-normalized
@@ -139,8 +139,8 @@ class TestCrossModuleIntegration:
     def test_cv_transforms_with_models(self):
         """Test computer vision transforms with models."""
         try:
-            from computer_vision.transforms import get_val_transforms
-            from computer_vision.models import SimpleCNN
+            from pytorch_mastery_hub.computer_vision.transforms import get_val_transforms
+            from pytorch_mastery_hub.computer_vision.models import SimpleCNN
             from PIL import Image
             import numpy as np
             
@@ -169,8 +169,8 @@ class TestCrossModuleIntegration:
     
     def test_nlp_tokenization_with_models(self):
         """Test NLP tokenization with models."""
-        from nlp.tokenization import SimpleTokenizer
-        from nlp.models import RNNClassifier
+        from pytorch_mastery_hub.nlp.tokenization import SimpleTokenizer
+        from pytorch_mastery_hub.nlp.models import RNNClassifier
         
         # Create tokenizer and build vocabulary
         texts = ["hello world", "this is test", "another example"]
@@ -204,7 +204,7 @@ class TestAdvancedFeatures:
     
     def test_gan_training_integration(self):
         """Test basic GAN training integration."""
-        from advanced.gan_utils import Generator, Discriminator, GANTrainer
+        from pytorch_mastery_hub.advanced.gan_utils import Generator, Discriminator, GANTrainer
         
         # Create GAN components
         generator = Generator(noise_dim=10, output_dim=20, hidden_dims=[16])
@@ -235,7 +235,7 @@ class TestAdvancedFeatures:
     
     def test_model_optimization_integration(self):
         """Test model optimization features."""
-        from advanced.optimization import ModelOptimizer
+        from pytorch_mastery_hub.advanced.optimization import ModelOptimizer
         
         # Create a simple model
         model = SimpleMLP(10, [20, 15], 5)
@@ -274,7 +274,7 @@ class TestErrorHandlingIntegration:
     
     def test_empty_data_handling(self):
         """Test handling of empty datasets."""
-        from utils.data_utils import create_data_loaders
+        from pytorch_mastery_hub.utils.data_utils import create_data_loaders
         
         # Empty dataset
         empty_X = torch.empty(0, 10)

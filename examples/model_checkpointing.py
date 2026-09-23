@@ -2,7 +2,7 @@
 Example: Model Checkpointing
 ==============================
 Demonstrates saving/loading model checkpoints, managing training state,
-and resuming interrupted training using src.utils.io_utils.
+and resuming interrupted training using pytorch_mastery_hub.utils.io_utils.
 Run: python examples/model_checkpointing.py
 """
 
@@ -10,14 +10,14 @@ import sys
 import os
 import tempfile
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.neural_networks.models import SimpleMLP
-from src.utils.io_utils import save_model, load_model, ModelCheckpointManager
+from pytorch_mastery_hub.neural_networks.models import SimpleMLP
+from pytorch_mastery_hub.utils.io_utils import save_model, load_model, ModelCheckpointManager
 
 
 def main():

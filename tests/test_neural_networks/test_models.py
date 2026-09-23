@@ -6,7 +6,7 @@ Tests for neural network models
 import pytest
 import torch
 import torch.nn as nn
-from neural_networks.models import (
+from pytorch_mastery_hub.neural_networks.models import (
     SimpleMLP, DeepMLP, CustomCNN, ResNet, SimpleRNN, 
     SimpleLSTM, SimpleGRU, TransformerBlock, SimpleTransformer,
     AutoEncoder, VariationalAutoEncoder

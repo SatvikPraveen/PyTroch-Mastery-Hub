@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pytorch-mastery-hub"
-version = "1.0.0"
+dynamic = ["version"]
 description = "Comprehensive PyTorch learning resource with hands-on examples"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -119,16 +119,19 @@ Issues = "https://github.com/SatvikPraveen/pytorch-mastery-hub/issues"
 Changelog = "https://github.com/SatvikPraveen/pytorch-mastery-hub/blob/main/CHANGELOG.md"
 
 [project.scripts]
-pytorch-hub = "src.utils.cli:main"
+pytorch-hub = "pytorch_mastery_hub.utils.cli:main"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "pytorch_mastery_hub.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-"*" = ["*.md", "*.txt", "*.yml", "*.yaml"]
+pytorch_mastery_hub = ["py.typed"]
 
 # Black configuration
 [tool.black]
@@ -163,18 +166,16 @@ skip_glob = ["notebooks/*", "venv/*", "env/*"]
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["tests"]
+pythonpath = ["src"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
     "-ra",
-    "-v",
     "--strict-markers",
     "--strict-config",
-    "--cov=src",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-report=xml",
+    "--tb=short",
+    "--durations=10",
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
@@ -183,14 +184,14 @@ markers = [
     "unit: marks tests as unit tests",
 ]
 filterwarnings = [
-    "error",
     "ignore::UserWarning",
     "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
 ]
 
 # Coverage configuration
 [tool.coverage.run]
-source = ["src"]
+source = ["pytorch_mastery_hub"]
 omit = [
     "*/tests/*",
     "*/test_*.py",

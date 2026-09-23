@@ -9,9 +9,9 @@ import torch
 import sys
 sys.path.insert(0, '..')  # if running from notebooks/
 
-from src.fundamentals.tensor_ops import tensor_stats
-from src.neural_networks.models import SimpleMLP
-from src.utils.data_utils import load_dataset
+from pytorch_mastery_hub.fundamentals.tensor_ops import tensor_stats
+from pytorch_mastery_hub.neural_networks.models import SimpleMLP
+from pytorch_mastery_hub.utils.data_utils import load_dataset
 
 # 1. Create tensors
 x = torch.randn(32, 10)
@@ -69,25 +69,25 @@ python examples/fine_tune_transformer.py
 
 ```python
 # Fundamentals
-from src.fundamentals.tensor_ops import safe_divide, batch_matrix_multiply
-from src.fundamentals.autograd_helpers import gradient_check, GradientClipping
+from pytorch_mastery_hub.fundamentals.tensor_ops import safe_divide, batch_matrix_multiply
+from pytorch_mastery_hub.fundamentals.autograd_helpers import gradient_check, GradientClipping
 
 # Neural Networks
-from src.neural_networks.models import SimpleMLP, SimpleTransformer
-from src.neural_networks.training import train_epoch, validate_epoch
-from src.neural_networks.optimizers import CustomAdam, WarmupCosineAnnealingLR
+from pytorch_mastery_hub.neural_networks.models import SimpleMLP, SimpleTransformer
+from pytorch_mastery_hub.neural_networks.training import train_epoch, validate_epoch
+from pytorch_mastery_hub.neural_networks.optimizers import CustomAdam, WarmupCosineAnnealingLR
 
 # Computer Vision
-from src.computer_vision.models import SimpleCNN, ResNetCV
-from src.computer_vision.augmentation import MixUp, CutMix
+from pytorch_mastery_hub.computer_vision.models import SimpleCNN, ResNetCV
+from pytorch_mastery_hub.computer_vision.augmentation import MixUp, CutMix
 
 # NLP
-from src.nlp.models import RNNClassifier, TransformerClassifier
-from src.nlp.tokenization import SimpleTokenizer
+from pytorch_mastery_hub.nlp.models import RNNClassifier, TransformerClassifier
+from pytorch_mastery_hub.nlp.tokenization import SimpleTokenizer
 
 # Utilities
-from src.utils.data_utils import load_dataset
-from src.utils.metrics import accuracy, classification_report
-from src.utils.io_utils import save_model, load_model, ModelCheckpointManager
-from src.utils.visualization import plot_training_curves
+from pytorch_mastery_hub.utils.data_utils import load_dataset
+from pytorch_mastery_hub.utils.metrics import accuracy, classification_report
+from pytorch_mastery_hub.utils.io_utils import save_model, load_model, ModelCheckpointManager
+from pytorch_mastery_hub.utils.visualization import plot_training_curves
 ```

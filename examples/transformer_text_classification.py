@@ -1,7 +1,7 @@
 """
 Example: Transformer Text Classification
 ==========================================
-Demonstrates using the TransformerClassifier from src.nlp.models for
+Demonstrates using the TransformerClassifier from pytorch_mastery_hub.nlp.models for
 binary sentiment classification on synthetic text data.
 Run: python examples/transformer_text_classification.py
 """
@@ -9,15 +9,15 @@ Run: python examples/transformer_text_classification.py
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.nlp.models import TransformerClassifier
-from src.nlp.tokenization import SimpleTokenizer
-from src.utils.metrics import accuracy, precision_recall_f1
+from pytorch_mastery_hub.nlp.models import TransformerClassifier
+from pytorch_mastery_hub.nlp.tokenization import SimpleTokenizer
+from pytorch_mastery_hub.utils.metrics import accuracy, precision_recall_f1
 
 
 # ── Synthetic data ────────────────────────────────────────────────

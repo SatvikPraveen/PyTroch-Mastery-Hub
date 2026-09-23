@@ -6,7 +6,7 @@ Tests for NLP tokenization utilities
 import pytest
 import tempfile
 from pathlib import Path
-from nlp.tokenization import (
+from pytorch_mastery_hub.nlp.tokenization import (
     SimpleTokenizer, BPETokenizer, SubwordTokenizer, WordTokenizer,
     tokenize_text, build_vocabulary
 )

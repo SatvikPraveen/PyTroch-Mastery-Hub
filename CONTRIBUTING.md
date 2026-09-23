@@ -158,7 +158,7 @@ Access Jupyter at `http://localhost:8888`
    pytest tests/
    
    # Run with coverage
-   pytest tests/ --cov=src --cov-report=html
+   pytest tests/ --cov=pytorch_mastery_hub --cov-report=html
    
    # Run specific test file
    pytest tests/test_fundamentals/test_tensor_ops.py
@@ -302,7 +302,7 @@ tests/
 ```python
 import pytest
 import torch
-from src.fundamentals.tensor_ops import safe_divide
+from pytorch_mastery_hub.fundamentals.tensor_ops import safe_divide
 
 class TestTensorOperations:
     """Test suite for tensor operations."""

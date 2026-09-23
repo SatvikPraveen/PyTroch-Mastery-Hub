@@ -7,7 +7,7 @@ import pytest
 import torch
 import numpy as np
 from PIL import Image
-from computer_vision.transforms import (
+from pytorch_mastery_hub.computer_vision.transforms import (
     get_train_transforms, get_val_transforms, RandomRotation,
     ColorJitter, GaussianBlur, MixUp, CutMix
 )
