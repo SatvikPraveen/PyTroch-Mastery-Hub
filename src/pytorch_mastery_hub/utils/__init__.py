@@ -3,6 +3,7 @@
 Utility functions for PyTorch Mastery Hub
 """
 
+from . import distributed
 from .data_utils import *
 from .device_utils import *
 from .io_utils import *
@@ -33,6 +34,8 @@ __all__ = [
     "classification_report",
     "regression_metrics",
     "top_k_accuracy",
+    # distributed (module)
+    "distributed",
     # device_utils
     "get_device",
     "autocast_dtype",

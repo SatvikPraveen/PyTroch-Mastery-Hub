@@ -34,6 +34,7 @@ from typing import Any, Literal
 import torch
 from torch import nn
 
+from ..utils import distributed as dist_utils
 from ..utils.device_utils import autocast_dtype, get_device, move_to_device
 from ..utils.reproducibility import capture_rng_state, restore_rng_state, seed_everything
 from .ema import ModelEMA
@@ -623,7 +624,7 @@ class Trainer:
         self.scaler = _make_scaler(self.amp_dtype == torch.float16 and self.device.type == "cuda")
         self.ema = (
             ModelEMA(
-                self._raw_model,
+                self.unwrapped_model,
                 decay=self.config.ema_decay,
                 warmup_steps=self.config.ema_warmup_steps,
             ).to(self.device)
@@ -640,8 +641,8 @@ class Trainer:
 
     @property
     def unwrapped_model(self) -> nn.Module:
-        """The model without ``torch.compile`` wrapping (use for state_dict)."""
-        return self._raw_model
+        """The model without ``torch.compile``/DDP wrapping (use for state_dict)."""
+        return dist_utils.unwrap_ddp(self._raw_model)
 
     @property
     def lr(self) -> float:
@@ -798,12 +799,13 @@ class Trainer:
         for epoch in range(start_epoch, self.config.epochs):
             self.current_epoch = epoch
             t0 = time.perf_counter()
+            dist_utils.set_epoch(train_loader, epoch)  # per-epoch shuffle under DDP
             for cb in self.callbacks:
                 cb.on_epoch_begin(self, epoch)
 
-            logs: dict[str, float] = dict(self.train_one_epoch(train_loader))
+            logs: dict[str, float] = dist_utils.reduce_dict(self.train_one_epoch(train_loader))
             if val_loader is not None:
-                val_logs = self.evaluate(val_loader)
+                val_logs = dist_utils.reduce_dict(self.evaluate(val_loader))
                 logs.update({f"val_{k}": v for k, v in val_logs.items()})
                 for cb in self.callbacks:
                     cb.on_validation_end(self, epoch, logs)
@@ -846,7 +848,7 @@ class Trainer:
     def state_dict(self) -> dict[str, Any]:
         """Everything needed to resume: weights, optimizer, scheduler, AMP, EMA, RNG."""
         state: dict[str, Any] = {
-            "model": self._raw_model.state_dict(),
+            "model": self.unwrapped_model.state_dict(),
             "optimizer": self.optimizer.state_dict(),
             "scheduler": self.scheduler.state_dict() if self.scheduler is not None else None,
             "scaler": self.scaler.state_dict(),
@@ -860,7 +862,7 @@ class Trainer:
         return state
 
     def load_state_dict(self, state: Mapping[str, Any], *, restore_rng: bool = True) -> None:
-        self._raw_model.load_state_dict(state["model"])
+        self.unwrapped_model.load_state_dict(state["model"])
         self.optimizer.load_state_dict(state["optimizer"])
         if self.scheduler is not None and state.get("scheduler") is not None:
             self.scheduler.load_state_dict(state["scheduler"])
