@@ -244,7 +244,10 @@ exclude_lines = [
 
 # MyPy configuration
 [tool.mypy]
-python_version = "3.10"
+# Type-check with 3.12 semantics: numpy >= 2.5 stubs use the PEP 695 `type` statement,
+# which mypy rejects under python_version < 3.12. Runtime 3.10 compatibility is still
+# enforced by ruff (target-version py310) and the CI test matrix.
+python_version = "3.12"
 files = ["src"]
 warn_unused_configs = true
 warn_redundant_casts = true
