@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- **Python** 3.8 or higher
+- **Python** 3.10 or higher
 - **pip** 21.0+
 - **Git**
 - **CUDA** (optional, for GPU acceleration)
@@ -14,17 +14,16 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/SatvikPraveen/pytorch-mastery-hub.git
-cd pytorch-mastery-hub
+git clone https://github.com/SatvikPraveen/PyTroch-Mastery-Hub.git
+cd PyTroch-Mastery-Hub
 
 # Create a virtual environment
 python -m venv venv
 source venv/bin/activate        # Linux/macOS
 # venv\Scripts\activate         # Windows
 
-# Install all dependencies
-pip install -r requirements.txt
-pip install -e .
+# Install the library with dev + notebook extras
+pip install -e ".[dev,notebooks]"
 
 # Start Jupyter Lab
 jupyter lab
@@ -91,15 +90,10 @@ pip install -e ".[all]"
 
 ## Verify Installation
 
-```python
-import torch
-import torchvision
-import numpy as np
-
-print(f"PyTorch: {torch.__version__}")
-print(f"TorchVision: {torchvision.__version__}")
-print(f"CUDA available: {torch.cuda.is_available()}")
-print(f"NumPy: {np.__version__}")
+```bash
+pytorch-hub info        # versions, best device, CUDA/MPS/bf16 support
+pytorch-hub benchmark   # optional: matmul / attention throughput
+pytest -m "not slow"    # run the test suite
 ```
 
 ## GPU Setup
@@ -144,6 +138,6 @@ pip install torch torchvision torchaudio
 - Install PyTorch with correct CUDA version from [pytorch.org](https://pytorch.org/get-started/locally/)
 
 **Out of memory errors**
-- Reduce batch size in notebook configurations
-- Use CPU if GPU memory is insufficient
-- Use mixed precision training: `torch.cuda.amp`
+- Reduce batch size, or raise `accumulation_steps` in `TrainerConfig` to keep the effective batch
+- Use mixed precision: `TrainerConfig(precision="auto")` picks bf16/fp16 per device
+- Track allocations with `pytorch_mastery_hub.utils.memory_utils.MemoryTracker`

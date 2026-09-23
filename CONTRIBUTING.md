@@ -24,7 +24,7 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 ### Reporting Bugs
 
-Before creating bug reports, please check the [existing issues](https://github.com/SatvikPraveen/pytorch-mastery-hub/issues) to avoid duplicates. When you create a bug report, include as many details as possible:
+Before creating bug reports, please check the [existing issues](https://github.com/SatvikPraveen/PyTroch-Mastery-Hub/issues) to avoid duplicates. When you create a bug report, include as many details as possible:
 
 - **Use a clear and descriptive title**
 - **Describe the exact steps to reproduce the problem**
@@ -85,14 +85,14 @@ We welcome code contributions! Here are some areas where you can help:
 - **Adding new notebooks**: Cover advanced topics or emerging PyTorch features
 - **Improving existing code**: Optimize implementations, add features
 - **Adding tests**: Increase code coverage
-- **Fixing bugs**: Check the [issues](https://github.com/SatvikPraveen/pytorch-mastery-hub/issues)
+- **Fixing bugs**: Check the [issues](https://github.com/SatvikPraveen/PyTroch-Mastery-Hub/issues)
 - **Adding utilities**: Create reusable helper functions
 
 ## Development Setup
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Git
 - (Optional) CUDA-compatible GPU for GPU-accelerated notebooks
 
@@ -206,9 +206,10 @@ Access Jupyter at `http://localhost:8888`
 We follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) with some modifications:
 
 - **Line length**: 100 characters (not 79)
-- **Docstring format**: NumPy style
-- **Import sorting**: Managed by `isort` with black profile
-- **Formatting**: Automated by `black`
+- **Docstring format**: Google or NumPy style (both are rendered by Sphinx napoleon)
+- **Linting, import sorting and formatting**: `ruff` (config in `pyproject.toml`); run `make format`
+- **Types**: new modules must pass `mypy` (`make type-check`); add `from __future__ import annotations`
+- **Commit messages**: Conventional Commits (`feat:`, `fix:`, `docs:`, ...), enforced by pre-commit
 
 **Example:**
 ```python

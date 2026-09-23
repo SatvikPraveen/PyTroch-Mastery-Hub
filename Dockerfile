@@ -1,10 +1,10 @@
 # PyTorch Mastery Hub - Development Container
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 # Metadata
-LABEL maintainer="PyTorch Mastery Hub Contributors"
+LABEL maintainer="Satvik Praveen <satvikpraveen707@gmail.com>"
 LABEL description="Development environment for PyTorch Mastery Hub"
-LABEL version="1.0.0"
+LABEL version="1.1.0"
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -34,17 +34,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Upgrade pip
 RUN pip install --upgrade pip setuptools wheel
 
-# Copy requirements first for better caching
-COPY requirements.txt .
-COPY pyproject.toml .
-COPY README.md .
-
-# Install Python dependencies
-RUN pip install -r requirements.txt
-
-# Install the package in editable mode
+# Install dependencies first (cached layer), CPU torch wheels keep the image small
+COPY pyproject.toml README.md ./
 COPY src/ ./src/
-RUN pip install -e ".[dev,notebooks,advanced]"
+RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu -e ".[dev,notebooks]"
 
 # Copy the rest of the application
 COPY . .

@@ -10,7 +10,7 @@ NOTEBOOKS_DIR := notebooks
 VENV_DIR := venv
 
 .PHONY: help install install-dev install-all clean clean-pyc clean-build clean-test \
-	test test-unit test-integration test-coverage lint format type-check security-check \
+	test test-unit test-integration test-coverage examples train benchmark lint lint-fix format type-check security-check \
 	docs docs-serve notebooks notebook-clean pre-commit docker docker-gpu tox \
 	setup-dev check-all
 
@@ -80,6 +80,16 @@ test-coverage:  ## Run tests with coverage report
 
 test-parallel:  ## Run tests in parallel (requires pytest-xdist)
 	$(PYTEST) $(TESTS_DIR) -v -n auto
+
+examples:  ## Execute every example script (CPU, synthetic data)
+	@for f in examples/*.py; do case $$f in */__init__.py) continue;; esac; echo "== $$f"; MPLBACKEND=Agg $(PYTHON) $$f > /dev/null || exit 1; done
+	@echo "All examples ran successfully."
+
+train:  ## Run the reference training pipeline from configs/train_synthetic.yaml
+	pytorch-hub train --config configs/train_synthetic.yaml
+
+benchmark:  ## Measure matmul / attention throughput on this machine
+	pytorch-hub benchmark
 
 ## ─────────────────────────────────────────────────────────
 ##  Code Quality

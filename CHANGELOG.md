@@ -7,8 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-23
+
 ### Added
-- Pending items for next release
+- **Training engine rewrite** (`neural_networks.training`): device-agnostic autocast
+  (CUDA fp16/bf16, CPU bf16), gradient accumulation with partial-window flush, grad-norm
+  clipping reported as a metric, automatic per-step vs per-epoch scheduler handling
+  (`ReduceLROnPlateau` receives the monitored metric), optional `torch.compile`, seeded
+  runs, dict-style batches, custom per-batch metrics, typed `Callback` protocol,
+  `LambdaCallback`, `EarlyStopping` that restores best weights, `ModelCheckpoint` writing
+  resumable state (model, optimizer, scheduler, scaler, EMA, RNG, epoch, step, history).
+- `neural_networks.ema.ModelEMA` with warm-up decay, `swap()` context and `state_dict`.
+- `neural_networks.attention`: `RMSNorm`, `RotaryEmbedding` (NTK scaling), grouped-query
+  `MultiHeadAttention` on fused SDPA with padding/causal/explicit masks, `KVCache`,
+  `SwiGLU`, pre-norm `DecoderBlock`, `TransformerLM` with KV-cached `generate()`
+  (greedy, temperature, top-k, top-p, EOS).
+- `advanced.lora`: `LoRALinear`, `apply_lora()`, `mark_only_lora_trainable()`,
+  `lora_state_dict()`, `merge_lora()` / `unmerge_lora()`.
+- `utils.distributed`: torchrun-aware process-group setup, metric reduction, uneven
+  all-gather, DDP wrapping/unwrapping, samplers, `main_process_first()`, `spawn()`.
+  `Trainer` is DDP-aware (sampler epochs, cross-rank metric averaging).
+- `utils.device_utils`, `utils.reproducibility`, `utils.logging_utils`,
+  `utils.model_utils`, `utils.memory_utils`: the helper modules notebooks imported but
+  which never existed (`get_device`, `seed_everything`, `setup_logger`,
+  `count_parameters`, `model_summary`, `MemoryTracker`, ...).
+- CLI: `pytorch-hub train` (YAML/flag-driven end-to-end pipeline writing logs, metrics
+  and checkpoints) and `pytorch-hub benchmark`; reference configs in `configs/`.
+- Property-based tests with Hypothesis, a real two-process gloo DDP test, CLI
+  end-to-end tests (~130 new tests; 290 total).
+- CI: lint/type/security gate, Python 3.10-3.13 matrix with CPU torch wheels,
+  example-script execution, wheel build + smoke install, docs build, CodeQL,
+  Dependabot, tag-triggered release workflow, Read the Docs config, API reference pages.
+
+### Changed
+- Library moved to a proper src layout: `import pytorch_mastery_hub` replaces the old
+  `src.*` / bare `utils.*` imports. `setup.py` removed; `pyproject.toml` is the single
+  source of packaging truth with a dynamic version and `py.typed`.
+- Toolchain: ruff replaces black/isort/flake8; mypy with gradual per-module strictness;
+  refreshed pre-commit hooks with conventional-commit enforcement.
+- Minimum Python is 3.10 (3.8/3.9 are end-of-life); classifiers cover 3.10-3.13.
+- Example scripts rewritten against the real library API and executed in CI.
+- `from __future__ import annotations` enforced in every module.
+
+### Fixed
+- `utils.metrics.accuracy(topk>1)` crashed on non-contiguous tensors.
+- `EarlyStoppingCallback` never restored weights and `ModelCheckpointCallback` never
+  saved anything; both now work (kept as aliases of the new classes).
+- `tests/pytest.ini` used the wrong section header and silently shadowed the
+  pyproject configuration (unregistered markers, missing coverage settings).
+- Console-script entry point pointed at a non-installed module path.
 
 ## [1.0.0] - 2026-03-09
 
