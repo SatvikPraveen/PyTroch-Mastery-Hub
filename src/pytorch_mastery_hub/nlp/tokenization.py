@@ -5,7 +5,7 @@ Text preprocessing and tokenization utilities for PyTorch Mastery Hub
 
 from __future__ import annotations
 
-import pickle
+import pickle  # nosec B403 - tokenizer files are written and read by this module only
 import re
 import string
 from collections import Counter, OrderedDict
@@ -115,7 +115,7 @@ class SimpleTokenizer:
     def load(self, filepath: str | Path) -> None:
         """Load tokenizer."""
         with open(filepath, "rb") as f:
-            data = pickle.load(f)
+            data = pickle.load(f)  # nosec B301 - trusted local tokenizer file
 
         self.word_to_idx = data["word_to_idx"]
         self.idx_to_word = data["idx_to_word"]

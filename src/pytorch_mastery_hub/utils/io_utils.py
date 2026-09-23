@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
-import pickle
+import pickle  # nosec B403 - only used for local result files written by save_results
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -71,7 +71,7 @@ def load_model(
     if not filepath.exists():
         raise FileNotFoundError(f"Model file not found: {filepath}")
 
-    checkpoint = torch.load(filepath, map_location=map_location)
+    checkpoint = torch.load(filepath, map_location=map_location, weights_only=True)
 
     # Load model weights
     if "model_state_dict" in checkpoint:
@@ -163,7 +163,7 @@ def load_checkpoint(
     if not filepath.exists():
         raise FileNotFoundError(f"Checkpoint file not found: {filepath}")
 
-    checkpoint = torch.load(filepath, map_location=map_location)
+    checkpoint = torch.load(filepath, map_location=map_location, weights_only=True)
 
     # Load model weights
     if model is not None and "model_state_dict" in checkpoint:
@@ -240,7 +240,7 @@ def load_results(filepath: str | Path, format: str | None = None) -> dict[str, A
             results = yaml.safe_load(f)
     elif format in ["pickle", "pkl"]:
         with open(filepath, "rb") as f:
-            results = pickle.load(f)
+            results = pickle.load(f)  # nosec B301 - trusted local file
     else:
         raise ValueError(f"Unsupported format: {format}")
 

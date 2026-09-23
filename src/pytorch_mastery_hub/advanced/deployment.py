@@ -348,7 +348,7 @@ class TensorRTOptimizer:
 
 def serve_model(
     model_path: str,
-    host: str = "0.0.0.0",
+    host: str = "127.0.0.1",
     port: int = 8000,
     preprocessing_fn: Callable | None = None,
     postprocessing_fn: Callable | None = None,
@@ -358,7 +358,7 @@ def serve_model(
 
     Args:
         model_path: Path to saved model
-        host: Server host
+        host: Server host (default binds loopback only; pass "0.0.0.0" to expose)
         port: Server port
         preprocessing_fn: Preprocessing function
         postprocessing_fn: Postprocessing function
@@ -368,7 +368,8 @@ def serve_model(
 
         # Load model
         if model_path.endswith((".pt", ".pth")):
-            model = torch.load(model_path, map_location="cpu")
+            # Full pickled nn.Module from a path the operator controls (not user input).
+            model = torch.load(model_path, map_location="cpu", weights_only=False)  # nosec B614
         else:
             model = torch.jit.load(model_path)
 

@@ -262,7 +262,8 @@ exclude = ["venv", "env", "build", "dist", "notebooks"]
 # Bandit security configuration
 [tool.bandit]
 exclude_dirs = ["tests", "notebooks", "examples", "scripts"]
-skips = ["B101", "B601"]
+# B311: `random` is used for data augmentation, not security
+skips = ["B101", "B601", "B311"]
 
 
 # Gradual typing: legacy tutorial modules are exempt until they are annotated.

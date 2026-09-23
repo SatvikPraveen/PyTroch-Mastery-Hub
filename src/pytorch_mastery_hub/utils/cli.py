@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
+import subprocess  # nosec B404 - fixed argv lists built from sys.executable
 import sys
 import time
 from collections.abc import Sequence
@@ -327,14 +327,14 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
 def cmd_test(args: argparse.Namespace) -> int:
     cmd = [sys.executable, "-m", "pytest", "-q"]
     cmd.append(f"tests/test_{args.module}/" if args.module else "tests/")
-    return subprocess.call(cmd)
+    return subprocess.call(cmd)  # nosec B603
 
 
 def cmd_download_data(args: argparse.Namespace) -> int:
     cmd = [sys.executable, "scripts/download_datasets.py"]
     if args.datasets:
         cmd += ["--datasets", *args.datasets]
-    return subprocess.call(cmd)
+    return subprocess.call(cmd)  # nosec B603
 
 
 # ---------------------------------------------------------------------- parser

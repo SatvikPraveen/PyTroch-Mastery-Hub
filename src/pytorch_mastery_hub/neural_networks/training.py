@@ -888,7 +888,9 @@ class Trainer:
     def load_checkpoint(self, path: str | Path, *, restore_rng: bool = True) -> dict[str, Any]:
         # Load to CPU: module/optimizer load_state_dict copy into device tensors, and
         # RNG states must stay on CPU (map_location="mps"/"cuda" would break them).
-        state = torch.load(Path(path), map_location="cpu", weights_only=False)
+        # weights_only=False is required for the RNGState / numpy generator objects that
+        # save_checkpoint writes; only load checkpoints you produced yourself.
+        state = torch.load(Path(path), map_location="cpu", weights_only=False)  # nosec B614
         self.load_state_dict(state, restore_rng=restore_rng)
         extra: dict[str, Any] = state.get("extra", {})
         return extra

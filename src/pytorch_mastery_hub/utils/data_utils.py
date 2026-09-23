@@ -478,7 +478,7 @@ def download_dataset(name: str, data_dir: str = "data", verify_hash: bool = True
 
     # Download file
     print(f"Downloading {name} dataset...")
-    response = requests.get(info["url"], stream=True)
+    response = requests.get(info["url"], stream=True, timeout=60)
     response.raise_for_status()
 
     with open(file_path, "wb") as f:
@@ -495,7 +495,7 @@ def download_dataset(name: str, data_dir: str = "data", verify_hash: bool = True
 
 def _verify_file_hash(file_path: Path, expected_hash: str) -> bool:
     """Verify file hash."""
-    hash_md5 = hashlib.md5()
+    hash_md5 = hashlib.md5(usedforsecurity=False)  # integrity check against published md5
     with open(file_path, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
