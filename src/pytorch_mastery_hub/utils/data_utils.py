@@ -311,7 +311,8 @@ def normalize_data(
         if method == "standard":
             scaler = StandardScaler()
         elif method == "minmax":
-            scaler = MinMaxScaler()
+            # clip=True guarantees outputs stay in [0, 1] despite float32 rounding
+            scaler = MinMaxScaler(clip=True)
         else:
             raise ValueError(f"Unknown normalization method: {method}")
 
