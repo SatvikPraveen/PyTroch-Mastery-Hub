@@ -159,7 +159,7 @@ def _build_model(cfg: dict[str, Any], in_size: int, n_classes: int) -> Any:
     if m["type"] == "cnn":
         from ..computer_vision.models import SimpleCNN
 
-        return SimpleCNN(num_classes=n_classes, in_channels=m.get("in_channels", 1))
+        return SimpleCNN(input_channels=m.get("in_channels", 1), num_classes=n_classes)
     raise ValueError(f"unknown model type {m['type']!r}")
 
 
@@ -206,7 +206,7 @@ def cmd_train(args: argparse.Namespace) -> int:
     optimizer = opt_cls(groups, lr=o["lr"], **({"momentum": 0.9} if o["type"] == "sgd" else {}))
 
     t = cfg["trainer"]
-    scheduler = None
+    scheduler: Any = None
     if cfg["scheduler"]["type"] == "cosine":
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=t["epochs"])
     elif cfg["scheduler"]["type"] == "onecycle":
@@ -242,7 +242,7 @@ def cmd_train(args: argparse.Namespace) -> int:
             ),
         ],
     )
-    trainer.add_callback(_MetricsCallback(metrics))
+    trainer.add_callback(_metrics_callback(metrics))
 
     start = time.perf_counter()
     history = trainer.fit(train_loader, val_loader)
@@ -268,24 +268,11 @@ def cmd_train(args: argparse.Namespace) -> int:
     return 0
 
 
-class _MetricsCallback:
-    """Bridge Trainer epoch logs into a MetricsLogger (duck-typed Callback)."""
+def _metrics_callback(metrics: Any) -> Any:
+    """Bridge Trainer epoch logs into a MetricsLogger."""
+    from ..neural_networks.training import LambdaCallback
 
-    def __init__(self, metrics: Any) -> None:
-        self.metrics = metrics
-
-    def on_train_begin(self, trainer: Any) -> None: ...
-
-    def on_train_end(self, trainer: Any) -> None: ...
-
-    def on_epoch_begin(self, trainer: Any, epoch: int) -> None: ...
-
-    def on_batch_end(self, trainer: Any, step: int, logs: dict[str, float]) -> None: ...
-
-    def on_validation_end(self, trainer: Any, epoch: int, logs: dict[str, float]) -> None: ...
-
-    def on_epoch_end(self, trainer: Any, epoch: int, logs: dict[str, float]) -> None:
-        self.metrics.log(epoch, **logs)
+    return LambdaCallback(on_epoch_end=lambda trainer, epoch, logs: metrics.log(epoch, **logs))
 
 
 # ------------------------------------------------------------------- benchmark
@@ -317,8 +304,8 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
         print(f"{'matmul':<24}{n:>10}{ms:>12.3f}{tflops:>12.2f}")
 
     b, h, d = 8, 8, 64
-    for t in args.seq_lens:
-        q = torch.randn(b, h, t, d, device=device, dtype=dtype)
+    for seq_len in args.seq_lens:
+        q = torch.randn(b, h, seq_len, d, device=device, dtype=dtype)
         for _ in range(3):
             F.scaled_dot_product_attention(q, q, q, is_causal=True)
         synchronize(device)
@@ -327,8 +314,8 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
             F.scaled_dot_product_attention(q, q, q, is_causal=True)
         synchronize(device)
         ms = (time.perf_counter() - t0) / args.iters * 1e3
-        flops = 4 * b * h * t * t * d  # QK^T and PV, causal ~half but count full
-        print(f"{'sdpa (causal)':<24}{t:>10}{ms:>12.3f}{flops / (ms / 1e3) / 1e12:>12.2f}")
+        flops = 4 * b * h * seq_len * seq_len * d  # QK^T and PV (full, not halved for causal)
+        print(f"{'sdpa (causal)':<24}{seq_len:>10}{ms:>12.3f}{flops / (ms / 1e3) / 1e12:>12.2f}")
     return 0
 
 
