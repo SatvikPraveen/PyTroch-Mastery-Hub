@@ -33,20 +33,10 @@ jobs:
         pip install -e ".[dev]"
         pip install pytest-cov pytest-xdist
 
-    - name: Lint with flake8
+    - name: Lint and format check with ruff
       run: |
-        # Stop the build if there are Python syntax errors or undefined names
-        flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings
-        flake8 src tests --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
-    - name: Check formatting with black
-      run: |
-        black --check src tests || echo "::warning::Black formatting issues found (non-blocking)"
-
-    - name: Check import sorting with isort
-      run: |
-        isort --check-only src tests || echo "::warning::isort issues found (non-blocking)"
+        ruff check src tests examples scripts
+        ruff format --check src tests examples scripts
 
     - name: Run unit tests
       run: |

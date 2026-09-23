@@ -47,17 +47,17 @@ echo ""
 if $CHECK_ONLY; then
   echo "  Mode: CHECK ONLY (no files modified)"
   echo ""
-  run_tool "black (check)"   black --check src tests
-  run_tool "isort (check)"   isort --check-only src tests
-  run_tool "flake8"          flake8 src tests
-  run_tool "bandit"          bandit -r src -x tests -q
+  run_tool "ruff check"      ruff check src tests examples scripts
+  run_tool "ruff format"     ruff format --check src tests examples scripts
+  run_tool "mypy"            mypy
+  run_tool "bandit"          bandit -c pyproject.toml -r src -q
 else
   echo "  Mode: FORMAT + LINT"
   echo ""
-  run_tool "black"    black src tests
-  run_tool "isort"    isort src tests
-  run_tool "flake8"   flake8 src tests
-  run_tool "bandit"   bandit -r src -x tests -q
+  run_tool "ruff fix"     ruff check --fix src tests examples scripts
+  run_tool "ruff format"  ruff format src tests examples scripts
+  run_tool "mypy"         mypy
+  run_tool "bandit"       bandit -c pyproject.toml -r src -q
 fi
 
 echo ""

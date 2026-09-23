@@ -41,6 +41,7 @@ install:  ## Install core dependencies
 install-dev:  ## Install development dependencies
 	$(PIP) install -e ".[dev,notebooks]"
 	pre-commit install
+	pre-commit install --hook-type commit-msg
 	@echo "Development environment ready!"
 
 install-all:  ## Install all optional dependencies
@@ -84,19 +85,21 @@ test-parallel:  ## Run tests in parallel (requires pytest-xdist)
 ##  Code Quality
 ## ─────────────────────────────────────────────────────────
 
-lint:  ## Lint source code with flake8
-	flake8 $(SRC_DIR) $(TESTS_DIR)
+lint:  ## Lint source code with ruff
+	ruff check $(SRC_DIR) $(TESTS_DIR) examples scripts
 
-format:  ## Format code with black and isort
-	black $(SRC_DIR) $(TESTS_DIR)
-	isort $(SRC_DIR) $(TESTS_DIR)
+lint-fix:  ## Lint and auto-fix with ruff
+	ruff check --fix $(SRC_DIR) $(TESTS_DIR) examples scripts
+
+format:  ## Format code with ruff
+	ruff format $(SRC_DIR) $(TESTS_DIR) examples scripts
+	ruff check --select I --fix $(SRC_DIR) $(TESTS_DIR) examples scripts
 
 format-check:  ## Check code formatting without modifying files
-	black --check $(SRC_DIR) $(TESTS_DIR)
-	isort --check-only $(SRC_DIR) $(TESTS_DIR)
+	ruff format --check $(SRC_DIR) $(TESTS_DIR) examples scripts
 
 type-check:  ## Run mypy type checking
-	mypy $(SRC_DIR) --ignore-missing-imports
+	mypy
 
 security-check:  ## Run bandit security analysis
 	bandit -r $(SRC_DIR) -x $(TESTS_DIR)

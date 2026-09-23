@@ -167,9 +167,9 @@ Access Jupyter at `http://localhost:8888`
 4. **Format your code**
    ```bash
    # The pre-commit hooks will do this automatically, but you can run manually:
-   black src tests
-   isort src tests
-   flake8 src tests
+   ruff check --fix src tests examples scripts
+   ruff format src tests examples scripts
+   mypy
    ```
 
 5. **Commit your changes**
