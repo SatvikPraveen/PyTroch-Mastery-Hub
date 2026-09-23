@@ -270,7 +270,6 @@ module = [
     "pytorch_mastery_hub.neural_networks.layers",
     "pytorch_mastery_hub.neural_networks.models",
     "pytorch_mastery_hub.neural_networks.optimizers",
-    "pytorch_mastery_hub.neural_networks.training",
     "pytorch_mastery_hub.nlp.*",
     "pytorch_mastery_hub.utils.data_utils",
     "pytorch_mastery_hub.utils.io_utils",

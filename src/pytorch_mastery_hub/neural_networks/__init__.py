@@ -3,6 +3,7 @@
 Neural network components and utilities for PyTorch Mastery Hub
 """
 
+from .ema import *
 from .layers import *
 from .models import *
 from .optimizers import *
@@ -28,11 +29,20 @@ __all__ = [
     "TransformerBlock",
     # training
     "Trainer",
+    "TrainerConfig",
+    "Callback",
+    "LambdaCallback",
     "train_epoch",
     "validate_epoch",
+    "EarlyStopping",
+    "ModelCheckpoint",
+    "ProgressCallback",
     "EarlyStoppingCallback",
     "ModelCheckpointCallback",
     "LearningRateSchedulerCallback",
+    # ema
+    "ModelEMA",
+    "steps_to_reach",
     # optimizers
     "CustomSGD",
     "CustomAdam",
