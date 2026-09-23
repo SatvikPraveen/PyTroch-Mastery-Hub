@@ -65,7 +65,7 @@ services:
       - pytorch-outputs:/workspace/outputs
     environment:
       - PYTHONPATH=/workspace
-    command: pytorch-hub train --config config.yaml
+    command: pytorch-hub train --config configs/train_synthetic.yaml --output-dir /workspace/outputs/synthetic_mlp
     profiles:
       - training
 

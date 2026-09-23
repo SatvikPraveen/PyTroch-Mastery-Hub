@@ -1,0 +1,37 @@
+# Reference training config for `pytorch-hub train --config configs/train_synthetic.yaml`.
+# Any key here overrides the defaults in pytorch_mastery_hub.utils.cli.DEFAULT_TRAIN_CONFIG;
+# CLI flags (--epochs, --precision, ...) override this file.
+seed: 42
+output_dir: outputs/synthetic_mlp
+
+data:
+  name: synthetic          # synthetic | mnist | fashion_mnist | cifar10
+  n_samples: 4096
+  n_features: 32
+  n_classes: 4
+  batch_size: 64
+
+model:
+  type: mlp                # mlp | cnn
+  hidden_sizes: [128, 64]
+  dropout: 0.1
+
+optimizer:
+  type: adamw              # adamw | adam | sgd
+  lr: 0.002
+  weight_decay: 0.01       # not applied to biases / norm layers
+
+scheduler:
+  type: cosine             # cosine | onecycle | none
+
+trainer:
+  epochs: 8
+  precision: auto          # no | auto | fp16 | bf16
+  accumulation_steps: 1
+  clip_grad_norm: 1.0
+  ema_decay: 0.99
+  compile: false
+
+early_stopping:
+  monitor: val_loss
+  patience: 3
