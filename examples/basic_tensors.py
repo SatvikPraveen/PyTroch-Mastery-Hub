@@ -5,6 +5,8 @@ Demonstrates the core tensor operations available in PyTorch Mastery Hub.
 Run: python examples/basic_tensors.py
 """
 
+from __future__ import annotations
+
 import os
 import sys
 
@@ -17,6 +19,7 @@ from pytorch_mastery_hub.fundamentals.tensor_ops import (
     safe_divide,
     tensor_stats,
 )
+from pytorch_mastery_hub.utils.device_utils import get_device
 
 
 def main():
@@ -61,14 +64,8 @@ def main():
     print(f"   output shape : {result.shape}  (expected: torch.Size([8, 4, 3]))")
 
     # ── 5. Device placement ──────────────────────────────────────
-    print("\n5. Device Information")
-    device = (
-        "mps"
-        if torch.backends.mps.is_available()
-        else "cuda"
-        if torch.cuda.is_available()
-        else "cpu"
-    )
+    print("\n5. Device Information (via pytorch_mastery_hub.utils.device_utils.get_device)")
+    device = get_device()  # CUDA → MPS → CPU
     print(f"   Best available device: {device}")
     t = torch.randn(3, 3).to(device)
     print(f"   Tensor on {t.device}")

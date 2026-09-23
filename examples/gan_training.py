@@ -2,8 +2,10 @@
 Example: GAN Training Loop
 ============================
 Demonstrates training a simple GAN using pytorch_mastery_hub.advanced.gan_utils.
-Run: python examples/gan_training.py [--epochs 5]
+Run: python examples/gan_training.py [--epochs 5] [--gan-type vanilla|lsgan]
 """
+
+from __future__ import annotations
 
 import argparse
 import os
@@ -15,79 +17,76 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 from pytorch_mastery_hub.advanced.gan_utils import Discriminator, GANTrainer, Generator
+from pytorch_mastery_hub.utils.device_utils import get_device
+from pytorch_mastery_hub.utils.model_utils import count_parameters
+from pytorch_mastery_hub.utils.reproducibility import seed_everything
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="GAN Training Example")
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--latent-dim", type=int, default=100)
+    parser.add_argument("--noise-dim", type=int, default=32)
     parser.add_argument("--lr", type=float, default=2e-4)
+    parser.add_argument("--gan-type", choices=["vanilla", "lsgan"], default="vanilla")
     return parser.parse_args()
 
 
-def make_synthetic_dataset(n_samples=1000, data_dim=64):
-    """Simulate a simple 1D image-like dataset."""
-    # Real samples: mix of two Gaussians (simulating diverse real data)
+def make_synthetic_dataset(n_samples=1024, data_dim=64, batch_size=64):
+    """Real data: two Gaussian blobs, scaled into the generator's tanh range [-1, 1]."""
+    half = n_samples // 2
     x = torch.cat(
         [
-            torch.randn(n_samples // 2, data_dim) + 2,
-            torch.randn(n_samples // 2, data_dim) - 2,
+            0.5 + 0.15 * torch.randn(half, data_dim),
+            -0.5 + 0.15 * torch.randn(half, data_dim),
         ]
-    )
-    return DataLoader(TensorDataset(x), batch_size=64, shuffle=True)
+    ).clamp(-1, 1)
+    # drop_last: the generator uses BatchNorm, which needs more than one sample per batch
+    return DataLoader(TensorDataset(x), batch_size=batch_size, shuffle=True, drop_last=True)
 
 
 def main():
     args = parse_args()
-    device = torch.device(
-        "mps"
-        if torch.backends.mps.is_available()
-        else "cuda"
-        if torch.cuda.is_available()
-        else "cpu"
-    )
+    seed_everything(0)
+    device = get_device()
     print("=" * 60)
     print("PyTorch Mastery Hub — GAN Training Example")
     print("=" * 60)
     print(f"\nDevice      : {device}")
+    print(f"GAN type    : {args.gan_type}")
     print(f"Epochs      : {args.epochs}")
-    print(f"Latent dim  : {args.latent_dim}")
+    print(f"Noise dim   : {args.noise_dim}")
 
     data_dim = 64
-    dataloader = make_synthetic_dataset(n_samples=1000, data_dim=data_dim)
+    dataloader = make_synthetic_dataset(data_dim=data_dim, batch_size=args.batch_size)
+    real_all = dataloader.dataset.tensors[0]
 
     # ── Models ───────────────────────────────────────────────────
-    generator = Generator(
-        latent_dim=args.latent_dim,
-        output_dim=data_dim,
-    ).to(device)
-    discriminator = Discriminator(
-        input_dim=data_dim,
-    ).to(device)
-
-    g_params = sum(p.numel() for p in generator.parameters())
-    d_params = sum(p.numel() for p in discriminator.parameters())
-    print(f"\nGenerator params     : {g_params:,}")
-    print(f"Discriminator params : {d_params:,}")
+    generator = Generator(noise_dim=args.noise_dim, output_dim=data_dim, hidden_dims=[128, 256])
+    discriminator = Discriminator(input_dim=data_dim, hidden_dims=[256, 128])
+    generator, discriminator = generator.to(device), discriminator.to(device)
+    print(f"\nGenerator params     : {count_parameters(generator):,}")
+    print(f"Discriminator params : {count_parameters(discriminator):,}")
 
     # ── Trainer ──────────────────────────────────────────────────
+    g_optimizer = torch.optim.Adam(generator.parameters(), lr=args.lr, betas=(0.5, 0.999))
+    d_optimizer = torch.optim.Adam(discriminator.parameters(), lr=args.lr, betas=(0.5, 0.999))
     trainer = GANTrainer(
         generator=generator,
         discriminator=discriminator,
-        latent_dim=args.latent_dim,
-        lr=args.lr,
+        g_optimizer=g_optimizer,
+        d_optimizer=d_optimizer,
         device=device,
+        gan_type=args.gan_type,
     )
 
     print(f"\nTraining for {args.epochs} epochs...")
     for epoch in range(1, args.epochs + 1):
         g_losses, d_losses = [], []
-
         for (real_batch,) in dataloader:
             real_batch = real_batch.to(device)
-            d_loss = trainer.train_discriminator_step(real_batch)
-            g_loss = trainer.train_generator_step(real_batch.size(0))
+            noise = torch.randn(real_batch.size(0), args.noise_dim, device=device)
+            d_loss, g_loss = trainer.train_step(real_batch, noise)  # one D step + one G step
             d_losses.append(d_loss)
             g_losses.append(g_loss)
 
@@ -99,11 +98,12 @@ def main():
     print("\nGenerating samples from trained generator...")
     generator.eval()
     with torch.no_grad():
-        z = torch.randn(4, args.latent_dim, device=device)
-        fake_samples = generator(z)
-    print(f"  Generated sample shape : {fake_samples.shape}")
-    print(f"  Mean  : {fake_samples.mean().item():.4f}")
-    print(f"  Std   : {fake_samples.std().item():.4f}")
+        z = torch.randn(256, args.noise_dim, device=device)
+        fake_samples = generator(z).cpu()
+    print(f"  Generated sample shape : {tuple(fake_samples.shape)}")
+    print(f"  Real  data  mean / std : {real_all.mean():+.3f} / {real_all.std():.3f}")
+    print(f"  Fake  data  mean / std : {fake_samples.mean():+.3f} / {fake_samples.std():.3f}")
+    print(f"  Fake samples in [-1, 1]: {bool(fake_samples.abs().max() <= 1.0)} (tanh output)")
 
     print("\n✓ GAN training example completed!")
 

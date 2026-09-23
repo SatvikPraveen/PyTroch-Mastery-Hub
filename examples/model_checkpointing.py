@@ -2,9 +2,12 @@
 Example: Model Checkpointing
 ==============================
 Demonstrates saving/loading model checkpoints, managing training state,
-and resuming interrupted training using pytorch_mastery_hub.utils.io_utils.
+and resuming interrupted training using pytorch_mastery_hub.utils.io_utils
+and the resumable pytorch_mastery_hub.neural_networks.training.Trainer.
 Run: python examples/model_checkpointing.py
 """
+
+from __future__ import annotations
 
 import os
 import sys
@@ -17,19 +20,33 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from pytorch_mastery_hub.neural_networks.models import SimpleMLP
-from pytorch_mastery_hub.utils.io_utils import ModelCheckpointManager, load_model, save_model
+from pytorch_mastery_hub.neural_networks.training import Trainer, TrainerConfig, train_epoch
+from pytorch_mastery_hub.utils.io_utils import (
+    ModelCheckpointManager,
+    load_checkpoint,
+    load_model,
+    save_model,
+)
+from pytorch_mastery_hub.utils.reproducibility import seed_everything
+
+DEVICE = "cpu"  # tiny model; keeps the saved files device-agnostic
+
+
+def make_model():
+    return SimpleMLP(input_size=20, hidden_sizes=[64, 32], output_size=3)
 
 
 def main():
     print("=" * 60)
     print("PyTorch Mastery Hub — Model Checkpointing")
     print("=" * 60)
+    seed_everything(0)
 
     checkpoint_dir = tempfile.mkdtemp(prefix="pytorch_hub_checkpoints_")
     print(f"\nCheckpoint directory: {checkpoint_dir}")
 
     # ── Setup ─────────────────────────────────────────────────────
-    model = SimpleMLP(input_dim=20, hidden_dims=[64, 32], output_dim=3)
+    model = make_model()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     criterion = nn.CrossEntropyLoss()
 
@@ -37,73 +54,80 @@ def main():
     y_data = torch.randint(0, 3, (100,))
     loader = DataLoader(TensorDataset(x_data, y_data), batch_size=16, shuffle=True)
 
-    # ── Checkpoint manager ────────────────────────────────────────
+    # ── 1. ModelCheckpointManager: one checkpoint per epoch, keep the last 3 ──
     ckpt_manager = ModelCheckpointManager(
-        checkpoint_dir=checkpoint_dir,
-        model_name="mlp_demo",
-        max_checkpoints=3,  # Keep last 3 checkpoints
+        checkpoint_dir=checkpoint_dir, max_checkpoints=3, monitor="loss", mode="min"
     )
 
-    # ── Training with checkpoints ─────────────────────────────────
-    print("\nTraining for 5 epochs with checkpointing...")
-    best_loss = float("inf")
-
+    print("\n1. Training for 5 epochs with ModelCheckpointManager...")
     for epoch in range(1, 6):
-        model.train()
-        epoch_loss = 0.0
-        for x_b, y_b in loader:
-            optimizer.zero_grad()
-            loss = criterion(model(x_b), y_b)
-            loss.backward()
-            optimizer.step()
-            epoch_loss += loss.item()
+        metrics = train_epoch(model, loader, criterion, optimizer, DEVICE)
+        path = ckpt_manager.save_checkpoint(model, optimizer, epoch=epoch, metrics=metrics)
+        print(f"  Epoch {epoch}/5  loss: {metrics['loss']:.4f}  → {path.name}")
 
-        avg_loss = epoch_loss / len(loader)
-        is_best = avg_loss < best_loss
-        best_loss = min(best_loss, avg_loss)
+    print(f"\n  Files on disk : {sorted(p.name for p in ckpt_manager.checkpoint_dir.iterdir())}")
+    print(
+        "  (max_checkpoints=3 only prunes non-best files; every epoch improved here, so all stay)"
+    )
+    print(f"  Best checkpoint  : {ckpt_manager.get_best_checkpoint().name}")
+    print(f"  Latest checkpoint: {ckpt_manager.get_latest_checkpoint().name}")
 
-        # Save checkpoint each epoch
-        ckpt_manager.save_checkpoint(
-            model=model,
-            optimizer=optimizer,
-            epoch=epoch,
-            loss=avg_loss,
-            is_best=is_best,
-        )
-        print(f"  Epoch {epoch}/5  loss: {avg_loss:.4f}  {'★ BEST' if is_best else '      '}")
+    # ── 2. Load the best checkpoint into a fresh model ────────────
+    print("\n2. Loading best checkpoint into a fresh model...")
+    new_model = make_model()
+    ckpt = load_checkpoint(ckpt_manager.get_best_checkpoint(), model=new_model)
+    print(f"  Loaded from epoch {ckpt['epoch']}  (loss {ckpt['loss']:.4f})")
 
-    print(f"\nSaved checkpoints: {ckpt_manager.list_checkpoints()}")
+    same = all(torch.allclose(p1, p2) for p1, p2 in zip(model.parameters(), new_model.parameters()))
+    print(f"  Weights match the trained model: {same} ✓")
 
-    # ── Load the best checkpoint ─────────────────────────────────
-    print("\nLoading best checkpoint...")
-    new_model = SimpleMLP(input_dim=20, hidden_dims=[64, 32], output_dim=3)
-    loaded_epoch = ckpt_manager.load_best(new_model)
-    print(f"  Loaded from epoch: {loaded_epoch}")
-
-    # Verify weights match
-    for (n1, p1), (n2, p2) in zip(model.named_parameters(), new_model.named_parameters()):
-        if n1 == n2 and not torch.allclose(p1.data, p2.data):
-            print(f"  WARNING: {n1} weights differ!")
-
-    # ── Simple save / load ────────────────────────────────────────
-    print("\nSimple model save/load...")
+    # ── 3. Simple save / load ─────────────────────────────────────
+    print("\n3. Simple model save/load (save_model / load_model)...")
     save_path = os.path.join(checkpoint_dir, "final_model.pth")
-    save_model(model, save_path)
+    save_model(model, save_path, metadata={"epochs": 5, "note": "checkpointing demo"})
     print(f"  Saved to: {save_path}")
 
-    restored = SimpleMLP(input_dim=20, hidden_dims=[64, 32], output_dim=3)
-    load_model(restored, save_path)
+    restored = make_model()
+    info = load_model(restored, save_path)
+    print(f"  Metadata: {info.get('metadata')}")
 
-    # Test restored model gives identical output
     model.eval()
     restored.eval()
     with torch.no_grad():
         x_test = torch.randn(4, 20)
-        out_original = model(x_test)
-        out_restored = restored(x_test)
-
-    match = torch.allclose(out_original, out_restored, atol=1e-5)
+        match = torch.allclose(model(x_test), restored(x_test), atol=1e-5)
     print(f"  Outputs match after restore: {match} ✓")
+
+    # ── 4. Resuming an interrupted Trainer run ────────────────────
+    print("\n4. Resuming training with Trainer.save_checkpoint / load_checkpoint...")
+    resume_path = os.path.join(checkpoint_dir, "trainer_state.pt")
+
+    first_model = make_model()
+    trainer = Trainer(
+        first_model,
+        criterion,
+        torch.optim.Adam(first_model.parameters(), lr=1e-3),
+        DEVICE,
+        config=TrainerConfig(epochs=2),
+    )
+    trainer.fit(loader)  # "interrupted" after 2 epochs
+    trainer.save_checkpoint(resume_path, extra={"note": "stopped after epoch 2"})
+    print(
+        f"  Saved trainer state at epoch {trainer.current_epoch} → {os.path.basename(resume_path)}"
+    )
+
+    fresh_model = make_model()
+    resumed = Trainer(
+        fresh_model,
+        criterion,
+        torch.optim.Adam(fresh_model.parameters(), lr=1e-3),
+        DEVICE,
+        config=TrainerConfig(epochs=4),
+    )
+    extra = resumed.load_checkpoint(resume_path)
+    print(f"  Restored ({extra['note']}); continuing from epoch {resumed.current_epoch + 1}...")
+    history = resumed.fit(loader)  # runs only epochs 3 and 4
+    print(f"  History now covers {len(history['loss'])} epochs (2 before + 2 after resume)")
 
     print("\n✓ Checkpointing example completed!")
 

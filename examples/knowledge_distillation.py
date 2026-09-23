@@ -6,6 +6,8 @@ smaller student model using pytorch_mastery_hub.advanced.optimization.KnowledgeD
 Run: python examples/knowledge_distillation.py
 """
 
+from __future__ import annotations
+
 import os
 import sys
 
@@ -17,135 +19,109 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from pytorch_mastery_hub.advanced.optimization import KnowledgeDistillation
 from pytorch_mastery_hub.neural_networks.models import SimpleMLP
-from pytorch_mastery_hub.utils.metrics import accuracy
+from pytorch_mastery_hub.neural_networks.training import train_epoch, validate_epoch
+from pytorch_mastery_hub.utils.device_utils import get_device
+from pytorch_mastery_hub.utils.model_utils import count_parameters
+from pytorch_mastery_hub.utils.reproducibility import seed_everything
+
+INPUT_SIZE, NUM_CLASSES = 64, 5
 
 
-def model_param_count(model: nn.Module) -> int:
-    return sum(p.numel() for p in model.parameters())
+def make_synthetic_data(n_train=600, n_val=400):
+    """Toy task: overlapping Gaussian blobs, one per class (accuracy ceiling well below 100%)."""
+    n = n_train + n_val
+    centers = 0.5 * torch.randn(NUM_CLASSES, INPUT_SIZE)
+    y = torch.randint(0, NUM_CLASSES, (n,))
+    x = centers[y] + torch.randn(n, INPUT_SIZE)
+    train_loader = DataLoader(TensorDataset(x[:n_train], y[:n_train]), batch_size=32, shuffle=True)
+    val_loader = DataLoader(TensorDataset(x[n_train:], y[n_train:]), batch_size=64)
+    return train_loader, val_loader
+
+
+def fit(model, loader, device, epochs, lr=3e-3):
+    """Plain supervised training with the functional train_epoch API."""
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    criterion = nn.CrossEntropyLoss()
+    for _ in range(epochs):
+        train_epoch(model, loader, criterion, optimizer, device)
+
+
+def evaluate(model, loader, device) -> float:
+    """Validation accuracy in percent (validate_epoch returns a metrics dict)."""
+    return validate_epoch(model, loader, nn.CrossEntropyLoss(), device)["accuracy"]
 
 
 def main():
     print("=" * 60)
     print("PyTorch Mastery Hub — Knowledge Distillation")
     print("=" * 60)
-
-    device = torch.device(
-        "mps"
-        if torch.backends.mps.is_available()
-        else "cuda"
-        if torch.cuda.is_available()
-        else "cpu"
-    )
+    seed_everything(0)
+    device = get_device()
     print(f"\nDevice: {device}")
 
-    # ── Synthetic dataset ─────────────────────────────────────────
-    x_data = torch.randn(500, 64)
-    y_data = torch.randint(0, 5, (500,))
-    split = 400
-    train_loader = DataLoader(
-        TensorDataset(x_data[:split], y_data[:split]), batch_size=32, shuffle=True
-    )
-    val_loader = DataLoader(TensorDataset(x_data[split:], y_data[split:]), batch_size=32)
+    train_loader, val_loader = make_synthetic_data()
 
     # ── Teacher model (large) ─────────────────────────────────────
-    teacher = SimpleMLP(input_dim=64, hidden_dims=[256, 256, 128], output_dim=5).to(device)
-    print(f"\nTeacher params : {model_param_count(teacher):,}")
+    teacher = SimpleMLP(INPUT_SIZE, hidden_sizes=[256, 256, 128], output_size=NUM_CLASSES)
+    print(f"\nTeacher params : {count_parameters(teacher):,}")
+    print("Training teacher (15 epochs)...")
+    fit(teacher, train_loader, device, epochs=15)
+    teacher_acc = evaluate(teacher, val_loader, device)
+    print(f"Teacher accuracy: {teacher_acc:.1f}%")
 
-    # Quick-train the teacher
-    t_optimizer = torch.optim.Adam(teacher.parameters(), lr=1e-3)
-    criterion = nn.CrossEntropyLoss()
-    teacher.train()
-    for _ in range(10):
-        for x_b, y_b in train_loader:
-            x_b, y_b = x_b.to(device), y_b.to(device)
-            t_optimizer.zero_grad()
-            criterion(teacher(x_b), y_b).backward()
-            t_optimizer.step()
-
-    # Evaluate teacher
-    teacher.eval()
-    preds, targets = [], []
-    with torch.no_grad():
-        for x_b, y_b in val_loader:
-            preds.append(teacher(x_b.to(device)).argmax(dim=-1).cpu())
-            targets.append(y_b)
-    teacher_acc = accuracy(torch.cat(preds), torch.cat(targets))
-    print(f"Teacher accuracy: {teacher_acc:.2%}")
-
-    # ── Student model (small) ─────────────────────────────────────
-    student_scratch = SimpleMLP(input_dim=64, hidden_dims=[64], output_dim=5).to(device)
-    student_distill = SimpleMLP(input_dim=64, hidden_dims=[64], output_dim=5).to(device)
+    # ── Student models (small) ────────────────────────────────────
+    student_scratch = SimpleMLP(INPUT_SIZE, hidden_sizes=[16], output_size=NUM_CLASSES)
+    student_distill = SimpleMLP(INPUT_SIZE, hidden_sizes=[16], output_size=NUM_CLASSES)
+    student_distill.load_state_dict(student_scratch.state_dict())  # identical starting point
+    s_params = count_parameters(student_scratch)
     print(
-        f"\nStudent params : {model_param_count(student_scratch):,}  "
-        f"({100 * model_param_count(student_scratch) / model_param_count(teacher):.1f}% of teacher)"
+        f"\nStudent params : {s_params:,}  ({100 * s_params / count_parameters(teacher):.1f}% of teacher)"
     )
 
-    # ── Train student from scratch ────────────────────────────────
-    print("\nTraining student from scratch (5 epochs)...")
-    s_optimizer = torch.optim.Adam(student_scratch.parameters(), lr=1e-3)
-    for epoch in range(1, 6):
-        student_scratch.train()
-        for x_b, y_b in train_loader:
-            x_b, y_b = x_b.to(device), y_b.to(device)
-            s_optimizer.zero_grad()
-            criterion(student_scratch(x_b), y_b).backward()
-            s_optimizer.step()
-
-    student_scratch.eval()
-    preds, targets = [], []
-    with torch.no_grad():
-        for x_b, y_b in val_loader:
-            preds.append(student_scratch(x_b.to(device)).argmax(dim=-1).cpu())
-            targets.append(y_b)
-    scratch_acc = accuracy(torch.cat(preds), torch.cat(targets))
-    print(f"Student (scratch) accuracy : {scratch_acc:.2%}")
+    # ── Train student from scratch (hard labels only) ─────────────
+    print("\nTraining student from scratch (15 epochs)...")
+    fit(student_scratch, train_loader, device, epochs=15)
+    scratch_acc = evaluate(student_scratch, val_loader, device)
+    print(f"Student (scratch) accuracy : {scratch_acc:.1f}%")
 
     # ── Train student with knowledge distillation ─────────────────
-    print("\nTraining student via knowledge distillation (5 epochs)...")
+    # loss = alpha * T² * KL(student_T || teacher_T) + (1 - alpha) * CE(student, y)
+    print("\nTraining student via knowledge distillation (15 epochs)...")
     kd = KnowledgeDistillation(
-        teacher=teacher,
-        student=student_distill,
+        teacher_model=teacher.to(device),
+        student_model=student_distill.to(device),
         temperature=4.0,
-        alpha=0.5,  # blend factor: 0.5 CE + 0.5 KD loss
+        alpha=0.7,  # weight of the soft-target (KD) term
     )
-    d_optimizer = torch.optim.Adam(student_distill.parameters(), lr=1e-3)
-
-    for epoch in range(1, 6):
-        student_distill.train()
-        epoch_loss = 0.0
+    d_optimizer = torch.optim.Adam(student_distill.parameters(), lr=3e-3)
+    for epoch in range(1, 16):
+        totals = {"total_loss": 0.0, "kd_loss": 0.0, "ce_loss": 0.0}
         for x_b, y_b in train_loader:
-            x_b, y_b = x_b.to(device), y_b.to(device)
-            d_optimizer.zero_grad()
-            loss = kd.distillation_loss(x_b, y_b)
-            loss.backward()
-            d_optimizer.step()
-            epoch_loss += loss.item()
-
-    student_distill.eval()
-    preds, targets = [], []
-    with torch.no_grad():
-        for x_b, y_b in val_loader:
-            preds.append(student_distill(x_b.to(device)).argmax(dim=-1).cpu())
-            targets.append(y_b)
-    distill_acc = accuracy(torch.cat(preds), torch.cat(targets))
-    print(f"Student (distilled) accuracy : {distill_acc:.2%}")
+            logs = kd.train_step(x_b.to(device), y_b.to(device), d_optimizer)
+            for k in totals:
+                totals[k] += logs[k]
+        n = len(train_loader)
+        print(
+            f"  Epoch {epoch:2d}/15  |  total: {totals['total_loss'] / n:.4f}  |  "
+            f"kd: {totals['kd_loss'] / n:.4f}  |  ce: {totals['ce_loss'] / n:.4f}"
+        )
+    distill_acc = evaluate(student_distill, val_loader, device)
+    print(f"Student (distilled) accuracy : {distill_acc:.1f}%")
 
     # ── Summary ──────────────────────────────────────────────────
     print("\n── Summary ──────────────────────────────────────────────")
     print(f"  {'Model':<30} {'Params':>8} {'Val Accuracy':>14}")
-    print(f"  {'-' * 52}")
-    print(f"  {'Teacher (large)':<30} {model_param_count(teacher):>8,} {teacher_acc:>14.2%}")
-    print(
-        f"  {'Student (trained scratch)':<30} {model_param_count(student_scratch):>8,} "
-        f"{scratch_acc:>14.2%}"
-    )
-    print(
-        f"  {'Student (distilled)':<30} {model_param_count(student_distill):>8,} "
-        f"{distill_acc:>14.2%}"
-    )
+    print(f"  {'-' * 54}")
+    rows = [
+        ("Teacher (large)", teacher, teacher_acc),
+        ("Student (trained scratch)", student_scratch, scratch_acc),
+        ("Student (distilled)", student_distill, distill_acc),
+    ]
+    for name, model, acc in rows:
+        print(f"  {name:<30} {count_parameters(model):>8,} {acc:>13.1f}%")
 
-    improvement = distill_acc - scratch_acc
-    print(f"\n  Distillation improvement: {improvement:+.2%}")
+    print(f"\n  Distillation improvement: {distill_acc - scratch_acc:+.1f} points")
+    print("  (on such a small toy task the gap can be small or even negative)")
     print("\n✓ Knowledge distillation example completed!")
 
 

@@ -6,6 +6,8 @@ torch.autograd.Function. Uses helpers from pytorch_mastery_hub.fundamentals.auto
 Run: python examples/custom_autograd.py
 """
 
+from __future__ import annotations
+
 import os
 import sys
 
@@ -61,14 +63,17 @@ def demo_custom_relu():
 
 
 def demo_gradient_check():
-    """Numerical gradient checking."""
+    """Numerical gradient checking (finite differences vs. autograd)."""
     print("\n── Gradient Check ─────────────────────────────────────")
 
     def simple_func(x):
         return (x**3).sum()
 
-    x = torch.randn(4, requires_grad=True, dtype=torch.float64)
-    passed = gradient_check(simple_func, x, eps=1e-5, tol=1e-4)
+    # float64 keeps the finite-difference error well below the tolerances. The helper
+    # perturbs ``x`` in place, which autograd forbids on a leaf tensor that requires
+    # grad, so we hand it a non-leaf copy (``.clone()`` of a leaf that requires grad).
+    x = torch.randn(4, dtype=torch.float64, requires_grad=True).clone()
+    passed = gradient_check(simple_func, x, eps=1e-6, atol=1e-5, rtol=1e-3)
     print(f"  Gradient check passed: {passed} ✓")
 
 
@@ -76,25 +81,19 @@ def demo_gradient_clipping():
     """Gradient clipping during training."""
     print("\n── Gradient Clipping ──────────────────────────────────")
     model = nn.Linear(10, 5)
-    clipper = GradientClipping(max_norm=1.0)
 
     x = torch.randn(32, 10)
-    y = torch.randn(32, 5)
+    y = torch.randn(32, 5) * 50  # large targets → large gradients
     loss = nn.MSELoss()(model(x), y)
     loss.backward()
 
-    # Check norms before and after clipping
-    norm_before = (
-        sum(p.grad.norm().item() ** 2 for p in model.parameters() if p.grad is not None) ** 0.5
-    )
-    clipper.clip(model.parameters())
-    norm_after = (
-        sum(p.grad.norm().item() ** 2 for p in model.parameters() if p.grad is not None) ** 0.5
-    )
+    # clip_grad_norm returns the total norm *before* clipping
+    norm_before = GradientClipping.clip_grad_norm(model.parameters(), max_norm=1.0)
+    norm_after = sum(p.grad.norm() ** 2 for p in model.parameters()) ** 0.5
 
-    print(f"  Gradient norm before clipping : {norm_before:.4f}")
-    print(f"  Gradient norm after  clipping : {norm_after:.4f}")
-    print(f"  Clipped to ≤ 1.0             : {norm_after <= 1.0 + 1e-5} ✓")
+    print(f"  Gradient norm before clipping : {float(norm_before):.4f}")
+    print(f"  Gradient norm after  clipping : {float(norm_after):.4f}")
+    print(f"  Clipped to ≤ 1.0             : {float(norm_after) <= 1.0 + 1e-5} ✓")
 
 
 def main():

@@ -1,10 +1,12 @@
 """
 Example: Transfer Learning with a Pretrained CNN
 ==================================================
-Demonstrates fine-tuning a pretrained ResNet on a custom dataset
-(simulated with synthetic data) using pytorch_mastery_hub.computer_vision modules.
+Demonstrates fine-tuning a pretrained ResNet-18 on a custom dataset (simulated with
+synthetic data) using the pytorch_mastery_hub Trainer and model utilities.
 Run: python examples/transfer_learning.py
 """
+
+from __future__ import annotations
 
 import os
 import sys
@@ -16,95 +18,85 @@ import torch.nn as nn
 import torchvision.models as tv_models
 from torch.utils.data import DataLoader, TensorDataset
 
-from pytorch_mastery_hub.neural_networks.training import train_epoch, validate_epoch
-from pytorch_mastery_hub.utils.metrics import accuracy
+from pytorch_mastery_hub.neural_networks.training import Trainer, TrainerConfig
+from pytorch_mastery_hub.utils.device_utils import get_device
+from pytorch_mastery_hub.utils.model_utils import count_parameters, freeze, unfreeze
+from pytorch_mastery_hub.utils.reproducibility import seed_everything
 
 
-def create_synthetic_image_data(num_train=200, num_val=50, num_classes=5, img_size=224):
-    """Create synthetic image-like tensors to simulate a classification dataset."""
-    x_train = torch.randn(num_train, 3, img_size, img_size)
-    y_train = torch.randint(0, num_classes, (num_train,))
-    x_val = torch.randn(num_val, 3, img_size, img_size)
-    y_val = torch.randint(0, num_classes, (num_val,))
+def create_synthetic_image_data(num_train=160, num_val=40, num_classes=4, img_size=64):
+    """Synthetic 'photos': every class has its own colour tint, so there is something to learn."""
+    tints = torch.rand(num_classes, 3) * 2 - 1
+
+    def make(n):
+        y = torch.randint(0, num_classes, (n,))
+        x = tints[y].view(n, 3, 1, 1) + 0.5 * torch.randn(n, 3, img_size, img_size)
+        return TensorDataset(x, y)
+
     return (
-        DataLoader(TensorDataset(x_train, y_train), batch_size=16, shuffle=True),
-        DataLoader(TensorDataset(x_val, y_val), batch_size=16),
+        DataLoader(make(num_train), batch_size=16, shuffle=True),
+        DataLoader(make(num_val), batch_size=16),
         num_classes,
     )
 
 
-def build_fine_tuned_resnet(num_classes: int, freeze_backbone: bool = True) -> nn.Module:
-    """Load pretrained ResNet-18 and replace the final layer."""
-    model = tv_models.resnet18(weights=tv_models.ResNet18_Weights.DEFAULT)
-    if freeze_backbone:
-        for param in model.parameters():
-            param.requires_grad = False
-    # Replace classification head
-    in_features = model.fc.in_features
-    model.fc = nn.Sequential(
-        nn.Dropout(0.3),
-        nn.Linear(in_features, num_classes),
-    )
+def build_resnet18(num_classes: int) -> nn.Module:
+    """Load ResNet-18 (ImageNet weights if available offline/online) and replace the head."""
+    try:
+        model = tv_models.resnet18(weights=tv_models.ResNet18_Weights.DEFAULT)
+        print("  Loaded ImageNet-pretrained weights")
+    except Exception as e:  # no network and no cached weights
+        print(f"  Pretrained weights unavailable ({e.__class__.__name__}); using random init")
+        model = tv_models.resnet18(weights=None)
+    model.fc = nn.Sequential(nn.Dropout(0.3), nn.Linear(model.fc.in_features, num_classes))
     return model
+
+
+def run_phase(name, model, train_loader, val_loader, device, lr, epochs):
+    """Train only the parameters that currently require grad, using the Trainer."""
+    params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.Adam(params, lr=lr)
+    trainer = Trainer(
+        model, nn.CrossEntropyLoss(), optimizer, device, config=TrainerConfig(epochs=epochs)
+    )
+    history = trainer.fit(train_loader, val_loader)
+    print(f"  → {name}: best val_accuracy {max(history['val_accuracy']):.1f}%")
+    return history
 
 
 def main():
     print("=" * 60)
     print("PyTorch Mastery Hub — Transfer Learning Example")
     print("=" * 60)
-
-    device = torch.device(
-        "mps"
-        if torch.backends.mps.is_available()
-        else "cuda"
-        if torch.cuda.is_available()
-        else "cpu"
-    )
+    seed_everything(0)
+    device = get_device()
     print(f"\nDevice: {device}")
 
     # ── Data ─────────────────────────────────────────────────────
-    print("\nCreating synthetic image dataset (200 train / 50 val)...")
+    print("\nCreating synthetic image dataset (160 train / 40 val, 64×64)...")
     train_loader, val_loader, num_classes = create_synthetic_image_data()
     print(f"  Classes: {num_classes}")
 
     # ── Model ────────────────────────────────────────────────────
-    print("\nBuilding fine-tuned ResNet-18...")
-    model = build_fine_tuned_resnet(num_classes=num_classes, freeze_backbone=True).to(device)
+    print("\nBuilding ResNet-18...")
+    model = build_resnet18(num_classes)
+    total = count_parameters(model)
 
-    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    total = sum(p.numel() for p in model.parameters())
+    # ── Phase 1: train only the new classification head ──────────
+    freeze(model)  # everything...
+    unfreeze(model, ["fc"])  # ...except the head
+    trainable = count_parameters(model, trainable_only=True)
     print(
-        f"  Trainable params : {trainable:,} / {total:,} ({100 * trainable / total:.1f}% of total)"
+        f"\nPhase 1 — frozen backbone: {trainable:,} / {total:,} trainable "
+        f"({100 * trainable / total:.2f}%)"
     )
+    run_phase("head only", model, train_loader, val_loader, device, lr=1e-3, epochs=3)
 
-    # ── Training ─────────────────────────────────────────────────
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-3)
-    criterion = nn.CrossEntropyLoss()
-
-    print("\nTraining for 3 epochs (frozen backbone)...")
-    for epoch in range(1, 4):
-        train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
-        val_loss, preds, targets = validate_epoch(model, val_loader, criterion, device)
-        val_acc = accuracy(preds, targets)
-        print(
-            f"  Epoch {epoch}/3  |  train_loss: {train_loss:.4f}  |  "
-            f"val_loss: {val_loss:.4f}  |  val_acc: {val_acc:.2%}"
-        )
-
-    # ── Unfreeze and fine-tune ────────────────────────────────────
-    print("\nUnfreezing all layers for fine-tuning...")
-    for param in model.parameters():
-        param.requires_grad = True
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
-
-    for epoch in range(4, 6):
-        train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
-        val_loss, preds, targets = validate_epoch(model, val_loader, criterion, device)
-        val_acc = accuracy(preds, targets)
-        print(
-            f"  Epoch {epoch}/5  |  train_loss: {train_loss:.4f}  |  "
-            f"val_loss: {val_loss:.4f}  |  val_acc: {val_acc:.2%}"
-        )
+    # ── Phase 2: unfreeze everything and fine-tune with a small LR ─
+    unfreeze(model)
+    trainable = count_parameters(model, trainable_only=True)
+    print(f"\nPhase 2 — full fine-tuning: {trainable:,} / {total:,} trainable")
+    run_phase("full fine-tune", model, train_loader, val_loader, device, lr=1e-4, epochs=2)
 
     print("\n✓ Transfer learning example completed!")
 
