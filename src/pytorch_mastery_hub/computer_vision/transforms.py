@@ -3,6 +3,8 @@
 Custom image transforms for PyTorch Mastery Hub
 """
 
+from __future__ import annotations
+
 import random
 
 import numpy as np

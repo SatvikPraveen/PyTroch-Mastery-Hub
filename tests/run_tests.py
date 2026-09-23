@@ -3,6 +3,8 @@
 Test runner script for PyTorch Mastery Hub
 """
 
+from __future__ import annotations
+
 import os
 import sys
 

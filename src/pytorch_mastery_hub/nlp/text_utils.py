@@ -3,6 +3,8 @@
 Text processing utilities for PyTorch Mastery Hub
 """
 
+from __future__ import annotations
+
 import re
 import string
 from collections import Counter

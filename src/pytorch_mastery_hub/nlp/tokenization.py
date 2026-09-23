@@ -3,6 +3,8 @@
 Text preprocessing and tokenization utilities for PyTorch Mastery Hub
 """
 
+from __future__ import annotations
+
 import pickle
 import re
 import string

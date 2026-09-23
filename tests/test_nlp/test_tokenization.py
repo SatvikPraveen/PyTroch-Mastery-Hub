@@ -3,6 +3,8 @@
 Tests for NLP tokenization utilities
 """
 
+from __future__ import annotations
+
 import pytest
 
 from pytorch_mastery_hub.nlp.tokenization import (

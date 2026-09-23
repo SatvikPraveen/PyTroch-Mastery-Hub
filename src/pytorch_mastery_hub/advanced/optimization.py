@@ -3,6 +3,8 @@
 Model optimization techniques for PyTorch Mastery Hub
 """
 
+from __future__ import annotations
+
 import time
 from typing import Any
 
@@ -353,7 +355,7 @@ class ModelOptimizer:
         self.current_model = model
         self.optimization_history = []
 
-    def apply_pruning(self, amount: float = 0.2, method: str = "magnitude") -> "ModelOptimizer":
+    def apply_pruning(self, amount: float = 0.2, method: str = "magnitude") -> ModelOptimizer:
         """Apply pruning optimization."""
         pruner = ModelPruner(self.current_model)
 
@@ -375,7 +377,7 @@ class ModelOptimizer:
 
         return self
 
-    def apply_quantization(self, method: str = "dynamic") -> "ModelOptimizer":
+    def apply_quantization(self, method: str = "dynamic") -> ModelOptimizer:
         """Apply quantization optimization."""
         quantizer = ModelQuantizer(self.current_model)
 

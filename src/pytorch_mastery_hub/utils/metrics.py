@@ -3,6 +3,8 @@
 Custom metrics and evaluation functions for PyTorch Mastery Hub
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 import numpy as np

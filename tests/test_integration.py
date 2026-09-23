@@ -3,6 +3,8 @@
 Integration tests for PyTorch Mastery Hub
 """
 
+from __future__ import annotations
+
 import pytest
 import torch
 import torch.nn as nn

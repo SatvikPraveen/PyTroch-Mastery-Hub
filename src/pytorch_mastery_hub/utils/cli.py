@@ -1,12 +1,16 @@
 """
 Command-line interface for PyTorch Mastery Hub.
 Provides quick access to common operations.
-Usage:
+
+Usage::
+
     pytorch-hub --help
     pytorch-hub info
     pytorch-hub test [--module MODULE]
     pytorch-hub download-data [--datasets mnist cifar10]
 """
+
+from __future__ import annotations
 
 import argparse
 import sys

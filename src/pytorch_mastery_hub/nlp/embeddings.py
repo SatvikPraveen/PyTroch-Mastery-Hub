@@ -3,6 +3,8 @@
 Embedding utilities for PyTorch Mastery Hub
 """
 
+from __future__ import annotations
+
 import math
 from pathlib import Path
 

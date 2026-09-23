@@ -3,6 +3,8 @@
 Tests for visualization utilities
 """
 
+from __future__ import annotations
+
 import matplotlib
 import numpy as np
 import pytest

@@ -3,6 +3,8 @@
 Custom autograd functions and gradient utilities for PyTorch Mastery Hub
 """
 
+from __future__ import annotations
+
 from collections.abc import Callable
 
 import torch

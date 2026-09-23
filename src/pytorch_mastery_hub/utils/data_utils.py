@@ -3,6 +3,8 @@
 Data loading and preprocessing utilities for PyTorch Mastery Hub
 """
 
+from __future__ import annotations
+
 import hashlib
 from pathlib import Path
 from typing import Any

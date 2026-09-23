@@ -3,6 +3,8 @@
 Pytest configuration and shared fixtures for PyTorch Mastery Hub tests
 """
 
+from __future__ import annotations
+
 import tempfile
 from pathlib import Path
 

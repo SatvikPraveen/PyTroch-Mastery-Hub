@@ -177,7 +177,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401", "F403", "F405", "RUF022"]
+"__init__.py" = ["F401", "F403", "F405", "RUF022", "I002"]
+"tests/**/__init__.py" = ["I002"]
+"scripts/**" = ["I002"]
+"docs/**" = ["I002"]
 "tests/**" = ["B011", "B017", "E712", "F841"]
 "examples/**" = ["E402"]
 "docs/conf.py" = ["E402"]
@@ -185,6 +188,8 @@ ignore = [
 [tool.ruff.lint.isort]
 known-first-party = ["pytorch_mastery_hub"]
 combine-as-imports = true
+# PEP 563 lazy annotations: lets `X | None` syntax work everywhere and keeps autodoc happy
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.format]
 quote-style = "double"

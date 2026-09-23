@@ -3,6 +3,8 @@
 Tests for neural network models
 """
 
+from __future__ import annotations
+
 import torch
 
 from pytorch_mastery_hub.neural_networks.models import (
