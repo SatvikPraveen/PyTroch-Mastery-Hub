@@ -281,6 +281,32 @@ class TestTrainer:
         hist = trainer2.fit(train, val)
         assert len(hist["loss"]) == 3
 
+    def test_checkpoint_roundtrip_on_best_available_device(self, temp_dir):
+        """Regression: loading with map_location=<accelerator> broke RNG restore on MPS/CUDA."""
+        from pytorch_mastery_hub.utils.device_utils import get_device
+        from pytorch_mastery_hub.utils.reproducibility import RNGState, restore_rng_state
+
+        train, val = make_loaders()
+        model = make_model()
+        trainer = Trainer(
+            model,
+            nn.CrossEntropyLoss(),
+            torch.optim.SGD(model.parameters(), 0.1),
+            get_device(),
+            config=TrainerConfig(epochs=1, verbose=False),
+        )
+        trainer.fit(train, val)
+        path = trainer.save_checkpoint(temp_dir / "ckpt.pt")
+        trainer.load_checkpoint(path)
+        assert trainer.current_epoch == 1
+        # restore_rng_state must also accept a state whose tensors were moved/cast
+        state = RNGState(
+            python=__import__("random").getstate(),
+            numpy=__import__("numpy").random.get_state(),
+            torch_cpu=torch.get_rng_state().to(torch.int32),
+        )
+        restore_rng_state(state)
+
     def test_ema_evaluate_and_predict(self, setup):
         model, opt, train, val = setup
         trainer = Trainer(

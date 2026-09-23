@@ -110,9 +110,11 @@ def restore_rng_state(state: RNGState) -> None:
     """Restore a snapshot taken with :func:`capture_rng_state`."""
     random.setstate(state.python)
     np.random.set_state(state.numpy)
-    torch.set_rng_state(state.torch_cpu)
+    # A state loaded with torch.load(map_location=<accelerator>) may have been moved;
+    # generators only accept CPU uint8 tensors.
+    torch.set_rng_state(state.torch_cpu.detach().to("cpu", torch.uint8))
     if state.torch_cuda is not None and torch.cuda.is_available():
-        torch.cuda.set_rng_state_all(state.torch_cuda)
+        torch.cuda.set_rng_state_all([s.detach().to("cpu", torch.uint8) for s in state.torch_cuda])
 
 
 @contextlib.contextmanager

@@ -886,7 +886,9 @@ class Trainer:
         return path
 
     def load_checkpoint(self, path: str | Path, *, restore_rng: bool = True) -> dict[str, Any]:
-        state = torch.load(Path(path), map_location=self.device, weights_only=False)
+        # Load to CPU: module/optimizer load_state_dict copy into device tensors, and
+        # RNG states must stay on CPU (map_location="mps"/"cuda" would break them).
+        state = torch.load(Path(path), map_location="cpu", weights_only=False)
         self.load_state_dict(state, restore_rng=restore_rng)
         extra: dict[str, Any] = state.get("extra", {})
         return extra
