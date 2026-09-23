@@ -3,11 +3,11 @@
 Custom layer implementations for PyTorch Mastery Hub
 """
 
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
-from typing import Optional, Tuple, Union
 
 
 class LinearLayer(nn.Module):
@@ -16,7 +16,7 @@ class LinearLayer(nn.Module):
     """
 
     def __init__(self, in_features: int, out_features: int, bias: bool = True):
-        super(LinearLayer, self).__init__()
+        super().__init__()
         self.in_features = in_features
         self.out_features = out_features
 
@@ -25,7 +25,7 @@ class LinearLayer(nn.Module):
         if bias:
             self.bias = nn.Parameter(torch.randn(out_features))
         else:
-            self.register_parameter('bias', None)
+            self.register_parameter("bias", None)
 
         self.reset_parameters()
 
@@ -40,7 +40,7 @@ class LinearLayer(nn.Module):
         return output
 
     def extra_repr(self) -> str:
-        return f'in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}'
+        return f"in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}"
 
 
 class ConvLayer(nn.Module):
@@ -52,36 +52,36 @@ class ConvLayer(nn.Module):
         self,
         in_channels: int,
         out_channels: int,
-        kernel_size: Union[int, Tuple[int, int]] = 3,
-        stride: Union[int, Tuple[int, int]] = 1,
-        padding: Union[int, Tuple[int, int]] = 1,
+        kernel_size: int | tuple[int, int] = 3,
+        stride: int | tuple[int, int] = 1,
+        padding: int | tuple[int, int] = 1,
         bias: bool = True,
-        activation: Optional[str] = 'relu',
-        norm: Optional[str] = None,
-        dropout: float = 0.0
+        activation: str | None = "relu",
+        norm: str | None = None,
+        dropout: float = 0.0,
     ):
-        super(ConvLayer, self).__init__()
+        super().__init__()
 
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
 
         # Normalization
-        if norm == 'batch':
+        if norm == "batch":
             self.norm = nn.BatchNorm2d(out_channels)
-        elif norm == 'instance':
+        elif norm == "instance":
             self.norm = nn.InstanceNorm2d(out_channels)
-        elif norm == 'group':
+        elif norm == "group":
             self.norm = nn.GroupNorm(8, out_channels)
         else:
             self.norm = None
 
         # Activation
-        if activation == 'relu':
+        if activation == "relu":
             self.activation = nn.ReLU(inplace=True)
-        elif activation == 'leaky_relu':
+        elif activation == "leaky_relu":
             self.activation = nn.LeakyReLU(0.2, inplace=True)
-        elif activation == 'gelu':
+        elif activation == "gelu":
             self.activation = nn.GELU()
-        elif activation == 'swish':
+        elif activation == "swish":
             self.activation = nn.SiLU()
         else:
             self.activation = None
@@ -109,14 +109,8 @@ class AttentionLayer(nn.Module):
     Multi-head attention layer implementation.
     """
 
-    def __init__(
-        self,
-        d_model: int,
-        num_heads: int = 8,
-        dropout: float = 0.1,
-        bias: bool = True
-    ):
-        super(AttentionLayer, self).__init__()
+    def __init__(self, d_model: int, num_heads: int = 8, dropout: float = 0.1, bias: bool = True):
+        super().__init__()
         assert d_model % num_heads == 0, "d_model must be divisible by num_heads"
 
         self.d_model = d_model
@@ -136,7 +130,7 @@ class AttentionLayer(nn.Module):
         query: torch.Tensor,
         key: torch.Tensor,
         value: torch.Tensor,
-        mask: Optional[torch.Tensor] = None
+        mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
         batch_size, seq_len = query.size(0), query.size(1)
 
@@ -154,20 +148,14 @@ class AttentionLayer(nn.Module):
         attention = self.scaled_dot_product_attention(Q, K, V, mask)
 
         # Concatenate heads
-        attention = attention.transpose(1, 2).contiguous().view(
-            batch_size, seq_len, self.d_model
-        )
+        attention = attention.transpose(1, 2).contiguous().view(batch_size, seq_len, self.d_model)
 
         # Final linear transformation
         output = self.out_linear(attention)
         return output
 
     def scaled_dot_product_attention(
-        self,
-        Q: torch.Tensor,
-        K: torch.Tensor,
-        V: torch.Tensor,
-        mask: Optional[torch.Tensor] = None
+        self, Q: torch.Tensor, K: torch.Tensor, V: torch.Tensor, mask: torch.Tensor | None = None
     ) -> torch.Tensor:
         # Compute attention scores
         scores = torch.matmul(Q, K.transpose(-2, -1)) / self.scale
@@ -193,18 +181,18 @@ class DropoutLayer(nn.Module):
     Custom dropout layer with different dropout types.
     """
 
-    def __init__(self, p: float = 0.5, dropout_type: str = 'standard'):
-        super(DropoutLayer, self).__init__()
+    def __init__(self, p: float = 0.5, dropout_type: str = "standard"):
+        super().__init__()
         self.p = p
         self.dropout_type = dropout_type
 
-        if dropout_type == 'standard':
+        if dropout_type == "standard":
             self.dropout = nn.Dropout(p)
-        elif dropout_type == '2d':
+        elif dropout_type == "2d":
             self.dropout = nn.Dropout2d(p)
-        elif dropout_type == '3d':
+        elif dropout_type == "3d":
             self.dropout = nn.Dropout3d(p)
-        elif dropout_type == 'alpha':
+        elif dropout_type == "alpha":
             self.dropout = nn.AlphaDropout(p)
         else:
             raise ValueError(f"Unknown dropout type: {dropout_type}")
@@ -224,9 +212,9 @@ class BatchNormLayer(nn.Module):
         dim: int = 2,
         eps: float = 1e-5,
         momentum: float = 0.1,
-        affine: bool = True
+        affine: bool = True,
     ):
-        super(BatchNormLayer, self).__init__()
+        super().__init__()
 
         if dim == 1:
             self.norm = nn.BatchNorm1d(num_features, eps, momentum, affine)
@@ -248,11 +236,11 @@ class LayerNormLayer(nn.Module):
 
     def __init__(
         self,
-        normalized_shape: Union[int, Tuple[int, ...]],
+        normalized_shape: int | tuple[int, ...],
         eps: float = 1e-5,
-        elementwise_affine: bool = True
+        elementwise_affine: bool = True,
     ):
-        super(LayerNormLayer, self).__init__()
+        super().__init__()
         self.norm = nn.LayerNorm(normalized_shape, eps, elementwise_affine)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -269,19 +257,21 @@ class ResidualBlock(nn.Module):
         in_channels: int,
         out_channels: int,
         stride: int = 1,
-        downsample: Optional[nn.Module] = None,
-        activation: str = 'relu'
+        downsample: nn.Module | None = None,
+        activation: str = "relu",
     ):
-        super(ResidualBlock, self).__init__()
+        super().__init__()
 
-        self.conv1 = ConvLayer(in_channels, out_channels, 3, stride, 1, norm='batch', activation=activation)
-        self.conv2 = ConvLayer(out_channels, out_channels, 3, 1, 1, norm='batch', activation=None)
+        self.conv1 = ConvLayer(
+            in_channels, out_channels, 3, stride, 1, norm="batch", activation=activation
+        )
+        self.conv2 = ConvLayer(out_channels, out_channels, 3, 1, 1, norm="batch", activation=None)
 
         self.downsample = downsample
 
-        if activation == 'relu':
+        if activation == "relu":
             self.final_activation = nn.ReLU(inplace=True)
-        elif activation == 'gelu':
+        elif activation == "gelu":
             self.final_activation = nn.GELU()
         else:
             self.final_activation = nn.ReLU(inplace=True)
@@ -307,13 +297,13 @@ class SEBlock(nn.Module):
     """
 
     def __init__(self, channels: int, reduction: int = 16):
-        super(SEBlock, self).__init__()
+        super().__init__()
         self.squeeze = nn.AdaptiveAvgPool2d(1)
         self.excitation = nn.Sequential(
             nn.Linear(channels, channels // reduction, bias=False),
             nn.ReLU(inplace=True),
             nn.Linear(channels // reduction, channels, bias=False),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -335,14 +325,14 @@ class ChannelAttention(nn.Module):
     """
 
     def __init__(self, in_channels: int, reduction_ratio: int = 16):
-        super(ChannelAttention, self).__init__()
+        super().__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.max_pool = nn.AdaptiveMaxPool2d(1)
 
         self.fc = nn.Sequential(
             nn.Linear(in_channels, in_channels // reduction_ratio, bias=False),
             nn.ReLU(inplace=True),
-            nn.Linear(in_channels // reduction_ratio, in_channels, bias=False)
+            nn.Linear(in_channels // reduction_ratio, in_channels, bias=False),
         )
         self.sigmoid = nn.Sigmoid()
 
@@ -367,7 +357,7 @@ class SpatialAttention(nn.Module):
     """
 
     def __init__(self, kernel_size: int = 7):
-        super(SpatialAttention, self).__init__()
+        super().__init__()
         self.conv = nn.Conv2d(2, 1, kernel_size, padding=kernel_size // 2, bias=False)
         self.sigmoid = nn.Sigmoid()
 
@@ -390,7 +380,7 @@ class CBAM(nn.Module):
     """
 
     def __init__(self, channels: int, reduction: int = 16, kernel_size: int = 7):
-        super(CBAM, self).__init__()
+        super().__init__()
         self.channel_attention = ChannelAttention(channels, reduction)
         self.spatial_attention = SpatialAttention(kernel_size)
 
@@ -406,19 +396,18 @@ class PositionalEncoding(nn.Module):
     """
 
     def __init__(self, d_model: int, max_len: int = 5000):
-        super(PositionalEncoding, self).__init__()
+        super().__init__()
 
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
 
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() *
-                           (-math.log(10000.0) / d_model))
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
 
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
 
         pe = pe.unsqueeze(0).transpose(0, 1)
-        self.register_buffer('pe', pe)
+        self.register_buffer("pe", pe)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return x + self.pe[:x.size(0), :]
+        return x + self.pe[: x.size(0), :]

@@ -6,16 +6,20 @@ pytorch_mastery_hub.advanced.optimization utilities to reduce model size.
 Run: python examples/model_optimization.py
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
 import torch.nn as nn
 
+from pytorch_mastery_hub.advanced.optimization import (
+    ModelPruner,
+    ModelQuantizer,
+    calculate_sparsity,
+)
 from pytorch_mastery_hub.neural_networks.models import SimpleMLP
-from pytorch_mastery_hub.advanced.optimization import ModelQuantizer, ModelPruner, calculate_sparsity
 
 
 def model_size_kb(model: nn.Module) -> float:
@@ -46,7 +50,7 @@ def main():
 
     base_acc = evaluate_model(model, x_sample, y_sample)
     base_size = model_size_kb(model)
-    print(f"\nBaseline Model")
+    print("\nBaseline Model")
     print(f"  Size     : {base_size:.1f} KB")
     print(f"  Accuracy : {base_acc:.2%}  (random weights, for illustration)")
 
@@ -57,7 +61,7 @@ def main():
     quant_size = model_size_kb(quant_model)
     quant_acc = evaluate_model(quant_model, x_sample, y_sample)
     print(f"  Quantized size   : {quant_size:.1f} KB")
-    print(f"  Size reduction   : {100*(1 - quant_size/base_size):.1f}%")
+    print(f"  Size reduction   : {100 * (1 - quant_size / base_size):.1f}%")
     print(f"  Accuracy         : {quant_acc:.2%}")
 
     # ── Magnitude pruning ────────────────────────────────────────
@@ -86,11 +90,13 @@ def main():
     # ── Summary ──────────────────────────────────────────────────
     print("\n── Optimization Summary ─────────────────────────────────")
     print(f"  {'Method':<25} {'Size (KB)':>10} {'Accuracy':>10}")
-    print(f"  {'-'*45}")
+    print(f"  {'-' * 45}")
     print(f"  {'Baseline':<25} {base_size:>10.1f} {base_acc:>10.2%}")
     print(f"  {'Dynamic Quantization':<25} {quant_size:>10.1f} {quant_acc:>10.2%}")
     print(f"  {'Magnitude Pruning 50%':<25} {model_size_kb(prunable):>10.1f} {pruned_acc:>10.2%}")
-    print(f"  {'Structured Pruning 30%':<25} {model_size_kb(struct_model):>10.1f} {struct_acc:>10.2%}")
+    print(
+        f"  {'Structured Pruning 30%':<25} {model_size_kb(struct_model):>10.1f} {struct_acc:>10.2%}"
+    )
 
     print("\n✓ Model optimization example completed!")
 

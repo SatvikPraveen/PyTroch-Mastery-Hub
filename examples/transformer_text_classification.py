@@ -6,8 +6,8 @@ binary sentiment classification on synthetic text data.
 Run: python examples/transformer_text_classification.py
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
@@ -18,7 +18,6 @@ from torch.utils.data import DataLoader, TensorDataset
 from pytorch_mastery_hub.nlp.models import TransformerClassifier
 from pytorch_mastery_hub.nlp.tokenization import SimpleTokenizer
 from pytorch_mastery_hub.utils.metrics import accuracy, precision_recall_f1
-
 
 # ── Synthetic data ────────────────────────────────────────────────
 POSITIVE_SENTENCES = [
@@ -59,8 +58,11 @@ def main():
     print("=" * 60)
 
     device = torch.device(
-        "mps" if torch.backends.mps.is_available() else
-        "cuda" if torch.cuda.is_available() else "cpu"
+        "mps"
+        if torch.backends.mps.is_available()
+        else "cuda"
+        if torch.cuda.is_available()
+        else "cpu"
     )
     print(f"\nDevice: {device}")
 
@@ -76,9 +78,7 @@ def main():
     dataset = build_dataset(tokenizer, all_sentences, labels, max_len=20)
 
     split = int(0.8 * len(dataset))
-    train_ds, val_ds = torch.utils.data.random_split(
-        dataset, [split, len(dataset) - split]
-    )
+    train_ds, val_ds = torch.utils.data.random_split(dataset, [split, len(dataset) - split])
     train_loader = DataLoader(train_ds, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=16)
     print(f"  Train samples: {len(train_ds)}  |  Val samples: {len(val_ds)}")
@@ -130,10 +130,12 @@ def main():
         val_acc = accuracy(all_preds, all_targets)
         p, r, f1 = precision_recall_f1(all_preds, all_targets, num_classes=2)
 
-        print(f"  Epoch {epoch}/5  |  "
-              f"train_loss: {total_loss / len(train_loader):.4f}  |  "
-              f"val_acc: {val_acc:.2%}  |  "
-              f"F1: {f1:.4f}")
+        print(
+            f"  Epoch {epoch}/5  |  "
+            f"train_loss: {total_loss / len(train_loader):.4f}  |  "
+            f"val_acc: {val_acc:.2%}  |  "
+            f"F1: {f1:.4f}"
+        )
 
     print("\n✓ Transformer classification example completed!")
 

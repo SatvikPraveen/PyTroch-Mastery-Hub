@@ -6,8 +6,8 @@ and resuming interrupted training using pytorch_mastery_hub.utils.io_utils.
 Run: python examples/model_checkpointing.py
 """
 
-import sys
 import os
+import sys
 import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
@@ -17,7 +17,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from pytorch_mastery_hub.neural_networks.models import SimpleMLP
-from pytorch_mastery_hub.utils.io_utils import save_model, load_model, ModelCheckpointManager
+from pytorch_mastery_hub.utils.io_utils import ModelCheckpointManager, load_model, save_model
 
 
 def main():
@@ -25,7 +25,6 @@ def main():
     print("PyTorch Mastery Hub — Model Checkpointing")
     print("=" * 60)
 
-    device = torch.device("cpu")
     checkpoint_dir = tempfile.mkdtemp(prefix="pytorch_hub_checkpoints_")
     print(f"\nCheckpoint directory: {checkpoint_dir}")
 
@@ -42,7 +41,7 @@ def main():
     ckpt_manager = ModelCheckpointManager(
         checkpoint_dir=checkpoint_dir,
         model_name="mlp_demo",
-        max_checkpoints=3,       # Keep last 3 checkpoints
+        max_checkpoints=3,  # Keep last 3 checkpoints
     )
 
     # ── Training with checkpoints ─────────────────────────────────
@@ -71,8 +70,7 @@ def main():
             loss=avg_loss,
             is_best=is_best,
         )
-        print(f"  Epoch {epoch}/5  loss: {avg_loss:.4f}  "
-              f"{'★ BEST' if is_best else '      '}")
+        print(f"  Epoch {epoch}/5  loss: {avg_loss:.4f}  {'★ BEST' if is_best else '      '}")
 
     print(f"\nSaved checkpoints: {ckpt_manager.list_checkpoints()}")
 

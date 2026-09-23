@@ -6,8 +6,8 @@ CV-specific models for PyTorch Mastery Hub
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import List, Optional, Tuple, Dict
-from ..neural_networks.layers import ConvLayer, ResidualBlock, AttentionLayer
+
+from ..neural_networks.layers import ConvLayer, ResidualBlock
 
 
 class SimpleCNN(nn.Module):
@@ -19,22 +19,24 @@ class SimpleCNN(nn.Module):
         self,
         input_channels: int = 3,
         num_classes: int = 10,
-        filters: List[int] = [32, 64, 128, 256],
-        dropout: float = 0.5
+        filters: list[int] = [32, 64, 128, 256],
+        dropout: float = 0.5,
     ):
-        super(SimpleCNN, self).__init__()
+        super().__init__()
 
         # Feature extractor
         layers = []
         in_channels = input_channels
 
         for out_channels in filters:
-            layers.extend([
-                nn.Conv2d(in_channels, out_channels, 3, 1, 1),
-                nn.BatchNorm2d(out_channels),
-                nn.ReLU(inplace=True),
-                nn.MaxPool2d(2, 2)
-            ])
+            layers.extend(
+                [
+                    nn.Conv2d(in_channels, out_channels, 3, 1, 1),
+                    nn.BatchNorm2d(out_channels),
+                    nn.ReLU(inplace=True),
+                    nn.MaxPool2d(2, 2),
+                ]
+            )
             in_channels = out_channels
 
         self.features = nn.Sequential(*layers)
@@ -44,7 +46,7 @@ class SimpleCNN(nn.Module):
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
             nn.Dropout(dropout),
-            nn.Linear(filters[-1], num_classes)
+            nn.Linear(filters[-1], num_classes),
         )
 
         self._initialize_weights()
@@ -52,7 +54,7 @@ class SimpleCNN(nn.Module):
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
             elif isinstance(m, nn.BatchNorm2d):
@@ -75,12 +77,12 @@ class ResNetCV(nn.Module):
 
     def __init__(
         self,
-        block_layers: List[int] = [2, 2, 2, 2],
+        block_layers: list[int] = [2, 2, 2, 2],
         num_classes: int = 1000,
         input_channels: int = 3,
-        width_multiplier: float = 1.0
+        width_multiplier: float = 1.0,
     ):
-        super(ResNetCV, self).__init__()
+        super().__init__()
 
         base_width = int(64 * width_multiplier)
         self.in_channels = base_width
@@ -123,7 +125,7 @@ class ResNetCV(nn.Module):
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.ones_(m.weight)
                 nn.init.zeros_(m.bias)
@@ -152,12 +154,9 @@ class UNet(nn.Module):
     """
 
     def __init__(
-        self,
-        in_channels: int = 3,
-        out_channels: int = 1,
-        features: List[int] = [64, 128, 256, 512]
+        self, in_channels: int = 3, out_channels: int = 1, features: list[int] = [64, 128, 256, 512]
     ):
-        super(UNet, self).__init__()
+        super().__init__()
 
         self.encoder = nn.ModuleList()
         self.decoder = nn.ModuleList()
@@ -174,9 +173,7 @@ class UNet(nn.Module):
 
         # Decoder (upsampling)
         for feature in reversed(features):
-            self.decoder.append(
-                nn.ConvTranspose2d(feature * 2, feature, 2, 2)
-            )
+            self.decoder.append(nn.ConvTranspose2d(feature * 2, feature, 2, 2))
             self.decoder.append(self._double_conv(feature * 2, feature))
 
         # Final layer
@@ -226,32 +223,29 @@ class FeatureExtractor(nn.Module):
     """
 
     def __init__(
-        self,
-        backbone: str = 'resnet18',
-        pretrained: bool = True,
-        feature_layer: Optional[str] = None
+        self, backbone: str = "resnet18", pretrained: bool = True, feature_layer: str | None = None
     ):
-        super(FeatureExtractor, self).__init__()
+        super().__init__()
 
         import torchvision.models as models
 
         # Load backbone
-        if backbone == 'resnet18':
+        if backbone == "resnet18":
             self.model = models.resnet18(pretrained=pretrained)
             self.feature_dim = 512
-        elif backbone == 'resnet50':
+        elif backbone == "resnet50":
             self.model = models.resnet50(pretrained=pretrained)
             self.feature_dim = 2048
-        elif backbone == 'vgg16':
+        elif backbone == "vgg16":
             self.model = models.vgg16(pretrained=pretrained)
             self.feature_dim = 4096
         else:
             raise ValueError(f"Unsupported backbone: {backbone}")
 
         # Remove classifier
-        if hasattr(self.model, 'fc'):
+        if hasattr(self.model, "fc"):
             self.model.fc = nn.Identity()
-        elif hasattr(self.model, 'classifier'):
+        elif hasattr(self.model, "classifier"):
             self.model.classifier = nn.Identity()
 
         # Hook for intermediate features
@@ -265,6 +259,7 @@ class FeatureExtractor(nn.Module):
         def hook(name):
             def fn(module, input, output):
                 self.features[name] = output
+
             return fn
 
         for name, module in self.model.named_modules():
@@ -288,10 +283,10 @@ class ObjectDetector(nn.Module):
     def __init__(
         self,
         num_classes: int,
-        backbone_channels: List[int] = [256, 512, 1024, 2048],
-        fpn_channels: int = 256
+        backbone_channels: list[int] = [256, 512, 1024, 2048],
+        fpn_channels: int = 256,
     ):
-        super(ObjectDetector, self).__init__()
+        super().__init__()
 
         self.num_classes = num_classes
 
@@ -306,14 +301,11 @@ class ObjectDetector(nn.Module):
     def _make_head(self, in_channels: int, out_channels: int):
         layers = []
         for _ in range(4):
-            layers.extend([
-                nn.Conv2d(in_channels, in_channels, 3, 1, 1),
-                nn.ReLU(inplace=True)
-            ])
+            layers.extend([nn.Conv2d(in_channels, in_channels, 3, 1, 1), nn.ReLU(inplace=True)])
         layers.append(nn.Conv2d(in_channels, out_channels, 3, 1, 1))
         return nn.Sequential(*layers)
 
-    def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         # Extract multi-scale features
         features = self.fpn(x)
 
@@ -327,9 +319,9 @@ class ObjectDetector(nn.Module):
             centerness.append(self.centerness_head(feature))
 
         return {
-            'cls_logits': cls_logits,
-            'box_regression': box_regression,
-            'centerness': centerness
+            "cls_logits": cls_logits,
+            "box_regression": box_regression,
+            "centerness": centerness,
         }
 
 
@@ -338,8 +330,8 @@ class FeaturePyramidNetwork(nn.Module):
     Feature Pyramid Network for multi-scale feature extraction.
     """
 
-    def __init__(self, in_channels_list: List[int], out_channels: int = 256):
-        super(FeaturePyramidNetwork, self).__init__()
+    def __init__(self, in_channels_list: list[int], out_channels: int = 256):
+        super().__init__()
 
         self.lateral_convs = nn.ModuleList()
         self.output_convs = nn.ModuleList()
@@ -351,7 +343,7 @@ class FeaturePyramidNetwork(nn.Module):
             self.lateral_convs.append(lateral_conv)
             self.output_convs.append(output_conv)
 
-    def forward(self, features: List[torch.Tensor]) -> List[torch.Tensor]:
+    def forward(self, features: list[torch.Tensor]) -> list[torch.Tensor]:
         # Top-down pathway
         results = []
         prev_features = self.lateral_convs[-1](features[-1])
@@ -361,9 +353,7 @@ class FeaturePyramidNetwork(nn.Module):
             lateral = self.lateral_convs[i](features[i])
 
             # Upsample and add
-            prev_features = F.interpolate(
-                prev_features, size=lateral.shape[-2:], mode='nearest'
-            )
+            prev_features = F.interpolate(prev_features, size=lateral.shape[-2:], mode="nearest")
             prev_features = lateral + prev_features
             results.insert(0, self.output_convs[i](prev_features))
 
@@ -385,9 +375,9 @@ class VisionTransformer(nn.Module):
         num_layers: int = 12,
         mlp_dim: int = 3072,
         dropout: float = 0.1,
-        in_channels: int = 3
+        in_channels: int = 3,
     ):
-        super(VisionTransformer, self).__init__()
+        super().__init__()
 
         self.patch_size = patch_size
         self.num_patches = (img_size // patch_size) ** 2
@@ -398,18 +388,15 @@ class VisionTransformer(nn.Module):
         )
 
         # Positional embedding
-        self.pos_embed = nn.Parameter(
-            torch.randn(1, self.num_patches + 1, d_model) * 0.02
-        )
+        self.pos_embed = nn.Parameter(torch.randn(1, self.num_patches + 1, d_model) * 0.02)
 
         # Class token
         self.cls_token = nn.Parameter(torch.randn(1, 1, d_model) * 0.02)
 
         # Transformer blocks
-        self.blocks = nn.ModuleList([
-            TransformerBlock(d_model, num_heads, mlp_dim, dropout)
-            for _ in range(num_layers)
-        ])
+        self.blocks = nn.ModuleList(
+            [TransformerBlock(d_model, num_heads, mlp_dim, dropout) for _ in range(num_layers)]
+        )
 
         self.norm = nn.LayerNorm(d_model)
         self.head = nn.Linear(d_model, num_classes)
@@ -447,14 +434,8 @@ class TransformerBlock(nn.Module):
     Transformer block for Vision Transformer.
     """
 
-    def __init__(
-        self,
-        d_model: int,
-        num_heads: int,
-        mlp_dim: int,
-        dropout: float = 0.1
-    ):
-        super(TransformerBlock, self).__init__()
+    def __init__(self, d_model: int, num_heads: int, mlp_dim: int, dropout: float = 0.1):
+        super().__init__()
 
         self.norm1 = nn.LayerNorm(d_model)
         self.attn = nn.MultiheadAttention(d_model, num_heads, dropout=dropout, batch_first=True)
@@ -465,7 +446,7 @@ class TransformerBlock(nn.Module):
             nn.GELU(),
             nn.Dropout(dropout),
             nn.Linear(mlp_dim, d_model),
-            nn.Dropout(dropout)
+            nn.Dropout(dropout),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -485,17 +466,12 @@ class EfficientNet(nn.Module):
     Simplified EfficientNet implementation.
     """
 
-    def __init__(
-        self,
-        num_classes: int = 1000,
-        width_mult: float = 1.0,
-        depth_mult: float = 1.0
-    ):
-        super(EfficientNet, self).__init__()
+    def __init__(self, num_classes: int = 1000, width_mult: float = 1.0, depth_mult: float = 1.0):
+        super().__init__()
 
         # Stem
         stem_channels = int(32 * width_mult)
-        self.stem = ConvLayer(3, stem_channels, 3, 2, 1, norm='batch', activation='swish')
+        self.stem = ConvLayer(3, stem_channels, 3, 2, 1, norm="batch", activation="swish")
 
         # Blocks configuration: (expand_ratio, channels, num_layers, stride)
         blocks_config = [
@@ -525,7 +501,9 @@ class EfficientNet(nn.Module):
 
         # Head
         head_channels = int(1280 * width_mult)
-        self.head_conv = ConvLayer(in_channels, head_channels, 1, 1, 0, norm='batch', activation='swish')
+        self.head_conv = ConvLayer(
+            in_channels, head_channels, 1, 1, 0, norm="batch", activation="swish"
+        )
         self.avgpool = nn.AdaptiveAvgPool2d(1)
         self.classifier = nn.Linear(head_channels, num_classes)
 
@@ -554,24 +532,34 @@ class MBConvBlock(nn.Module):
         out_channels: int,
         expand_ratio: int,
         stride: int,
-        se_ratio: float = 0.25
+        se_ratio: float = 0.25,
     ):
-        super(MBConvBlock, self).__init__()
+        super().__init__()
 
         self.use_residual = stride == 1 and in_channels == out_channels
         expanded_channels = in_channels * expand_ratio
 
         # Expansion
         if expand_ratio != 1:
-            self.expand = ConvLayer(in_channels, expanded_channels, 1, 1, 0, norm='batch', activation='swish')
+            self.expand = ConvLayer(
+                in_channels, expanded_channels, 1, 1, 0, norm="batch", activation="swish"
+            )
         else:
             self.expand = nn.Identity()
 
         # Depthwise
         self.depthwise = nn.Sequential(
-            nn.Conv2d(expanded_channels, expanded_channels, 3, stride, 1, groups=expanded_channels, bias=False),
+            nn.Conv2d(
+                expanded_channels,
+                expanded_channels,
+                3,
+                stride,
+                1,
+                groups=expanded_channels,
+                bias=False,
+            ),
             nn.BatchNorm2d(expanded_channels),
-            nn.SiLU(inplace=True)
+            nn.SiLU(inplace=True),
         )
 
         # Squeeze-and-excitation
@@ -582,13 +570,15 @@ class MBConvBlock(nn.Module):
                 nn.Conv2d(expanded_channels, se_channels, 1),
                 nn.SiLU(inplace=True),
                 nn.Conv2d(se_channels, expanded_channels, 1),
-                nn.Sigmoid()
+                nn.Sigmoid(),
             )
         else:
             self.se = None
 
         # Projection
-        self.project = ConvLayer(expanded_channels, out_channels, 1, 1, 0, norm='batch', activation=None)
+        self.project = ConvLayer(
+            expanded_channels, out_channels, 1, 1, 0, norm="batch", activation=None
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         identity = x

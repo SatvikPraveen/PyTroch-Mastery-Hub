@@ -6,8 +6,8 @@ Demonstrates fine-tuning a pretrained ResNet on a custom dataset
 Run: python examples/transfer_learning.py
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
@@ -16,7 +16,6 @@ import torch.nn as nn
 import torchvision.models as tv_models
 from torch.utils.data import DataLoader, TensorDataset
 
-from pytorch_mastery_hub.computer_vision.augmentation import MixUp
 from pytorch_mastery_hub.neural_networks.training import train_epoch, validate_epoch
 from pytorch_mastery_hub.utils.metrics import accuracy
 
@@ -55,8 +54,11 @@ def main():
     print("=" * 60)
 
     device = torch.device(
-        "mps" if torch.backends.mps.is_available() else
-        "cuda" if torch.cuda.is_available() else "cpu"
+        "mps"
+        if torch.backends.mps.is_available()
+        else "cuda"
+        if torch.cuda.is_available()
+        else "cpu"
     )
     print(f"\nDevice: {device}")
 
@@ -71,23 +73,23 @@ def main():
 
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     total = sum(p.numel() for p in model.parameters())
-    print(f"  Trainable params : {trainable:,} / {total:,} "
-          f"({100 * trainable / total:.1f}% of total)")
+    print(
+        f"  Trainable params : {trainable:,} / {total:,} ({100 * trainable / total:.1f}% of total)"
+    )
 
     # ── Training ─────────────────────────────────────────────────
-    optimizer = torch.optim.Adam(
-        filter(lambda p: p.requires_grad, model.parameters()), lr=1e-3
-    )
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-3)
     criterion = nn.CrossEntropyLoss()
-    mixup = MixUp(alpha=0.2)
 
     print("\nTraining for 3 epochs (frozen backbone)...")
     for epoch in range(1, 4):
         train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
         val_loss, preds, targets = validate_epoch(model, val_loader, criterion, device)
         val_acc = accuracy(preds, targets)
-        print(f"  Epoch {epoch}/3  |  train_loss: {train_loss:.4f}  |  "
-              f"val_loss: {val_loss:.4f}  |  val_acc: {val_acc:.2%}")
+        print(
+            f"  Epoch {epoch}/3  |  train_loss: {train_loss:.4f}  |  "
+            f"val_loss: {val_loss:.4f}  |  val_acc: {val_acc:.2%}"
+        )
 
     # ── Unfreeze and fine-tune ────────────────────────────────────
     print("\nUnfreezing all layers for fine-tuning...")
@@ -99,8 +101,10 @@ def main():
         train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
         val_loss, preds, targets = validate_epoch(model, val_loader, criterion, device)
         val_acc = accuracy(preds, targets)
-        print(f"  Epoch {epoch}/5  |  train_loss: {train_loss:.4f}  |  "
-              f"val_loss: {val_loss:.4f}  |  val_acc: {val_acc:.2%}")
+        print(
+            f"  Epoch {epoch}/5  |  train_loss: {train_loss:.4f}  |  "
+            f"val_loss: {val_loss:.4f}  |  val_acc: {val_acc:.2%}"
+        )
 
     print("\n✓ Transfer learning example completed!")
 

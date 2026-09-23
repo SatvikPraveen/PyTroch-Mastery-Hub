@@ -11,33 +11,17 @@ import pytest
 
 def run_all_tests():
     """Run all tests."""
-    return pytest.main([
-        "tests/",
-        "-v",
-        "--tb=short",
-        "--color=yes"
-    ])
+    return pytest.main(["tests/", "-v", "--tb=short", "--color=yes"])
 
 
 def run_unit_tests():
     """Run only unit tests (fast tests)."""
-    return pytest.main([
-        "tests/",
-        "-v",
-        "-m", "not slow and not gpu",
-        "--tb=short",
-        "--color=yes"
-    ])
+    return pytest.main(["tests/", "-v", "-m", "not slow and not gpu", "--tb=short", "--color=yes"])
 
 
 def run_integration_tests():
     """Run integration tests."""
-    return pytest.main([
-        "tests/test_integration.py",
-        "-v",
-        "--tb=short",
-        "--color=yes"
-    ])
+    return pytest.main(["tests/test_integration.py", "-v", "--tb=short", "--color=yes"])
 
 
 def run_specific_module(module_name):
@@ -45,30 +29,21 @@ def run_specific_module(module_name):
     test_path = f"tests/test_{module_name}/"
     if not os.path.exists(test_path):
         test_path = f"tests/test_{module_name}.py"
-    
-    return pytest.main([
-        test_path,
-        "-v",
-        "--tb=short",
-        "--color=yes"
-    ])
+
+    return pytest.main([test_path, "-v", "--tb=short", "--color=yes"])
 
 
 def run_coverage():
     """Run tests with coverage report."""
-    return pytest.main([
-        "tests/",
-        "--cov=pytorch_mastery_hub",
-        "--cov-report=html",
-        "--cov-report=term",
-        "-v"
-    ])
+    return pytest.main(
+        ["tests/", "--cov=pytorch_mastery_hub", "--cov-report=html", "--cov-report=term", "-v"]
+    )
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         command = sys.argv[1]
-        
+
         if command == "unit":
             exit_code = run_unit_tests()
         elif command == "integration":
@@ -84,5 +59,5 @@ if __name__ == "__main__":
             sys.exit(1)
     else:
         exit_code = run_all_tests()
-    
+
     sys.exit(exit_code)

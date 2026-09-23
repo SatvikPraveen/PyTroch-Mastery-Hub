@@ -5,17 +5,16 @@ Demonstrates training a simple GAN using pytorch_mastery_hub.advanced.gan_utils.
 Run: python examples/gan_training.py [--epochs 5]
 """
 
-import sys
-import os
 import argparse
+import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
-import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from pytorch_mastery_hub.advanced.gan_utils import Generator, Discriminator, GANTrainer
+from pytorch_mastery_hub.advanced.gan_utils import Discriminator, GANTrainer, Generator
 
 
 def parse_args():
@@ -30,18 +29,23 @@ def parse_args():
 def make_synthetic_dataset(n_samples=1000, data_dim=64):
     """Simulate a simple 1D image-like dataset."""
     # Real samples: mix of two Gaussians (simulating diverse real data)
-    x = torch.cat([
-        torch.randn(n_samples // 2, data_dim) + 2,
-        torch.randn(n_samples // 2, data_dim) - 2,
-    ])
+    x = torch.cat(
+        [
+            torch.randn(n_samples // 2, data_dim) + 2,
+            torch.randn(n_samples // 2, data_dim) - 2,
+        ]
+    )
     return DataLoader(TensorDataset(x), batch_size=64, shuffle=True)
 
 
 def main():
     args = parse_args()
     device = torch.device(
-        "mps" if torch.backends.mps.is_available() else
-        "cuda" if torch.cuda.is_available() else "cpu"
+        "mps"
+        if torch.backends.mps.is_available()
+        else "cuda"
+        if torch.cuda.is_available()
+        else "cpu"
     )
     print("=" * 60)
     print("PyTorch Mastery Hub — GAN Training Example")

@@ -3,12 +3,13 @@
 Model architectures for PyTorch Mastery Hub
 """
 
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
-from typing import List, Optional, Union, Tuple
-from .layers import *
+
+from .layers import AttentionLayer, ConvLayer, PositionalEncoding, ResidualBlock
 
 
 class SimpleMLP(nn.Module):
@@ -19,13 +20,13 @@ class SimpleMLP(nn.Module):
     def __init__(
         self,
         input_size: int,
-        hidden_sizes: List[int],
+        hidden_sizes: list[int],
         output_size: int,
-        activation: str = 'relu',
+        activation: str = "relu",
         dropout: float = 0.0,
-        batch_norm: bool = False
+        batch_norm: bool = False,
     ):
-        super(SimpleMLP, self).__init__()
+        super().__init__()
 
         self.input_size = input_size
         self.hidden_sizes = hidden_sizes
@@ -41,11 +42,11 @@ class SimpleMLP(nn.Module):
             if batch_norm:
                 layers.append(nn.BatchNorm1d(hidden_size))
 
-            if activation == 'relu':
+            if activation == "relu":
                 layers.append(nn.ReLU(inplace=True))
-            elif activation == 'gelu':
+            elif activation == "gelu":
                 layers.append(nn.GELU())
-            elif activation == 'tanh':
+            elif activation == "tanh":
                 layers.append(nn.Tanh())
 
             if dropout > 0:
@@ -63,7 +64,7 @@ class SimpleMLP(nn.Module):
         """Initialize model weights."""
         for m in self.modules():
             if isinstance(m, nn.Linear):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out")
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
@@ -84,9 +85,9 @@ class DeepMLP(nn.Module):
         output_size: int,
         residual: bool = True,
         dropout: float = 0.1,
-        layer_norm: bool = True
+        layer_norm: bool = True,
     ):
-        super(DeepMLP, self).__init__()
+        super().__init__()
 
         self.input_proj = nn.Linear(input_size, hidden_size)
         self.layers = nn.ModuleList()
@@ -119,7 +120,7 @@ class DeepMLPBlock(nn.Module):
     """Block for DeepMLP with residual connection."""
 
     def __init__(self, hidden_size: int, dropout: float, layer_norm: bool, residual: bool):
-        super(DeepMLPBlock, self).__init__()
+        super().__init__()
         self.residual = residual
 
         self.linear1 = nn.Linear(hidden_size, hidden_size * 4)
@@ -154,13 +155,9 @@ class CustomCNN(nn.Module):
     """
 
     def __init__(
-        self,
-        num_classes: int,
-        input_channels: int = 3,
-        base_filters: int = 64,
-        num_blocks: int = 4
+        self, num_classes: int, input_channels: int = 3, base_filters: int = 64, num_blocks: int = 4
     ):
-        super(CustomCNN, self).__init__()
+        super().__init__()
 
         self.features = self._make_feature_extractor(input_channels, base_filters, num_blocks)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
@@ -168,7 +165,7 @@ class CustomCNN(nn.Module):
             nn.Linear(base_filters * (2 ** (num_blocks - 1)), 512),
             nn.ReLU(inplace=True),
             nn.Dropout(0.5),
-            nn.Linear(512, num_classes)
+            nn.Linear(512, num_classes),
         )
 
         self._initialize_weights()
@@ -180,10 +177,16 @@ class CustomCNN(nn.Module):
 
         for i in range(num_blocks):
             # Convolutional block
-            layers.extend([
-                ConvLayer(current_channels, current_filters, 3, 1, 1, norm='batch', activation='relu'),
-                ConvLayer(current_filters, current_filters, 3, 1, 1, norm='batch', activation='relu'),
-            ])
+            layers.extend(
+                [
+                    ConvLayer(
+                        current_channels, current_filters, 3, 1, 1, norm="batch", activation="relu"
+                    ),
+                    ConvLayer(
+                        current_filters, current_filters, 3, 1, 1, norm="batch", activation="relu"
+                    ),
+                ]
+            )
 
             if i < num_blocks - 1:  # No pooling in the last block
                 layers.append(nn.MaxPool2d(2, 2))
@@ -196,7 +199,7 @@ class CustomCNN(nn.Module):
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
             elif isinstance(m, nn.Linear):
@@ -216,13 +219,8 @@ class ResNet(nn.Module):
     Simplified ResNet implementation.
     """
 
-    def __init__(
-        self,
-        num_classes: int,
-        layers: List[int] = [2, 2, 2, 2],
-        input_channels: int = 3
-    ):
-        super(ResNet, self).__init__()
+    def __init__(self, num_classes: int, layers: list[int] = [2, 2, 2, 2], input_channels: int = 3):
+        super().__init__()
 
         self.in_channels = 64
 
@@ -264,7 +262,7 @@ class ResNet(nn.Module):
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.ones_(m.weight)
                 nn.init.zeros_(m.bias)
@@ -299,17 +297,21 @@ class SimpleRNN(nn.Module):
         num_layers: int,
         output_size: int,
         dropout: float = 0.0,
-        bidirectional: bool = False
+        bidirectional: bool = False,
     ):
-        super(SimpleRNN, self).__init__()
+        super().__init__()
 
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.bidirectional = bidirectional
 
         self.rnn = nn.RNN(
-            input_size, hidden_size, num_layers,
-            dropout=dropout, bidirectional=bidirectional, batch_first=True
+            input_size,
+            hidden_size,
+            num_layers,
+            dropout=dropout,
+            bidirectional=bidirectional,
+            batch_first=True,
         )
 
         multiplier = 2 if bidirectional else 1
@@ -320,7 +322,9 @@ class SimpleRNN(nn.Module):
 
         # Initialize hidden state
         num_directions = 2 if self.bidirectional else 1
-        h0 = torch.zeros(self.num_layers * num_directions, batch_size, self.hidden_size).to(x.device)
+        h0 = torch.zeros(self.num_layers * num_directions, batch_size, self.hidden_size).to(
+            x.device
+        )
 
         # Forward pass
         out, _ = self.rnn(x, h0)
@@ -343,17 +347,21 @@ class SimpleLSTM(nn.Module):
         num_layers: int,
         output_size: int,
         dropout: float = 0.0,
-        bidirectional: bool = False
+        bidirectional: bool = False,
     ):
-        super(SimpleLSTM, self).__init__()
+        super().__init__()
 
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.bidirectional = bidirectional
 
         self.lstm = nn.LSTM(
-            input_size, hidden_size, num_layers,
-            dropout=dropout, bidirectional=bidirectional, batch_first=True
+            input_size,
+            hidden_size,
+            num_layers,
+            dropout=dropout,
+            bidirectional=bidirectional,
+            batch_first=True,
         )
 
         multiplier = 2 if bidirectional else 1
@@ -364,8 +372,12 @@ class SimpleLSTM(nn.Module):
 
         # Initialize hidden and cell states
         num_directions = 2 if self.bidirectional else 1
-        h0 = torch.zeros(self.num_layers * num_directions, batch_size, self.hidden_size).to(x.device)
-        c0 = torch.zeros(self.num_layers * num_directions, batch_size, self.hidden_size).to(x.device)
+        h0 = torch.zeros(self.num_layers * num_directions, batch_size, self.hidden_size).to(
+            x.device
+        )
+        c0 = torch.zeros(self.num_layers * num_directions, batch_size, self.hidden_size).to(
+            x.device
+        )
 
         # Forward pass
         out, _ = self.lstm(x, (h0, c0))
@@ -388,17 +400,21 @@ class SimpleGRU(nn.Module):
         num_layers: int,
         output_size: int,
         dropout: float = 0.0,
-        bidirectional: bool = False
+        bidirectional: bool = False,
     ):
-        super(SimpleGRU, self).__init__()
+        super().__init__()
 
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.bidirectional = bidirectional
 
         self.gru = nn.GRU(
-            input_size, hidden_size, num_layers,
-            dropout=dropout, bidirectional=bidirectional, batch_first=True
+            input_size,
+            hidden_size,
+            num_layers,
+            dropout=dropout,
+            bidirectional=bidirectional,
+            batch_first=True,
         )
 
         multiplier = 2 if bidirectional else 1
@@ -409,7 +425,9 @@ class SimpleGRU(nn.Module):
 
         # Initialize hidden state
         num_directions = 2 if self.bidirectional else 1
-        h0 = torch.zeros(self.num_layers * num_directions, batch_size, self.hidden_size).to(x.device)
+        h0 = torch.zeros(self.num_layers * num_directions, batch_size, self.hidden_size).to(
+            x.device
+        )
 
         # Forward pass
         out, _ = self.gru(x, h0)
@@ -426,13 +444,9 @@ class TransformerBlock(nn.Module):
     """
 
     def __init__(
-        self,
-        d_model: int,
-        num_heads: int = 8,
-        dim_feedforward: int = 2048,
-        dropout: float = 0.1
+        self, d_model: int, num_heads: int = 8, dim_feedforward: int = 2048, dropout: float = 0.1
     ):
-        super(TransformerBlock, self).__init__()
+        super().__init__()
 
         self.attention = AttentionLayer(d_model, num_heads, dropout)
         self.norm1 = nn.LayerNorm(d_model)
@@ -443,10 +457,10 @@ class TransformerBlock(nn.Module):
             nn.ReLU(inplace=True),
             nn.Dropout(dropout),
             nn.Linear(dim_feedforward, d_model),
-            nn.Dropout(dropout)
+            nn.Dropout(dropout),
         )
 
-    def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
         # Self-attention with residual connection
         attn_out = self.attention(x, x, x, mask)
         x = self.norm1(x + attn_out)
@@ -472,25 +486,27 @@ class SimpleTransformer(nn.Module):
         num_classes: int = 2,
         dim_feedforward: int = 2048,
         max_seq_len: int = 512,
-        dropout: float = 0.1
+        dropout: float = 0.1,
     ):
-        super(SimpleTransformer, self).__init__()
+        super().__init__()
 
         self.d_model = d_model
         self.embedding = nn.Embedding(vocab_size, d_model)
         self.pos_encoding = PositionalEncoding(d_model, max_seq_len)
         self.dropout = nn.Dropout(dropout)
 
-        self.transformer_blocks = nn.ModuleList([
-            TransformerBlock(d_model, num_heads, dim_feedforward, dropout)
-            for _ in range(num_layers)
-        ])
+        self.transformer_blocks = nn.ModuleList(
+            [
+                TransformerBlock(d_model, num_heads, dim_feedforward, dropout)
+                for _ in range(num_layers)
+            ]
+        )
 
         self.classifier = nn.Sequential(
             nn.Linear(d_model, d_model // 2),
             nn.ReLU(inplace=True),
             nn.Dropout(dropout),
-            nn.Linear(d_model // 2, num_classes)
+            nn.Linear(d_model // 2, num_classes),
         )
 
         self._initialize_weights()
@@ -500,7 +516,7 @@ class SimpleTransformer(nn.Module):
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
 
-    def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
         # Embedding and positional encoding
         x = self.embedding(x) * math.sqrt(self.d_model)
         x = self.pos_encoding(x)
@@ -522,41 +538,38 @@ class AutoEncoder(nn.Module):
     Simple AutoEncoder implementation.
     """
 
-    def __init__(
-        self,
-        input_size: int,
-        encoding_dims: List[int],
-        activation: str = 'relu'
-    ):
-        super(AutoEncoder, self).__init__()
+    def __init__(self, input_size: int, encoding_dims: list[int], activation: str = "relu"):
+        super().__init__()
 
         # Encoder
         encoder_layers = []
         prev_size = input_size
 
         for dim in encoding_dims:
-            encoder_layers.extend([
-                nn.Linear(prev_size, dim),
-                nn.ReLU(inplace=True) if activation == 'relu' else nn.Tanh()
-            ])
+            encoder_layers.extend(
+                [
+                    nn.Linear(prev_size, dim),
+                    nn.ReLU(inplace=True) if activation == "relu" else nn.Tanh(),
+                ]
+            )
             prev_size = dim
 
         self.encoder = nn.Sequential(*encoder_layers[:-1])  # Remove last activation
 
         # Decoder (reverse of encoder)
         decoder_layers = []
-        decoding_dims = list(reversed(encoding_dims[:-1])) + [input_size]
+        decoding_dims = [*list(reversed(encoding_dims[:-1])), input_size]
         prev_size = encoding_dims[-1]
 
         for i, dim in enumerate(decoding_dims):
             decoder_layers.append(nn.Linear(prev_size, dim))
             if i < len(decoding_dims) - 1:  # No activation on output layer
-                decoder_layers.append(nn.ReLU(inplace=True) if activation == 'relu' else nn.Tanh())
+                decoder_layers.append(nn.ReLU(inplace=True) if activation == "relu" else nn.Tanh())
             prev_size = dim
 
         self.decoder = nn.Sequential(*decoder_layers)
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return encoded, decoded
@@ -574,14 +587,14 @@ class VariationalAutoEncoder(nn.Module):
     """
 
     def __init__(self, input_size: int, hidden_size: int, latent_size: int):
-        super(VariationalAutoEncoder, self).__init__()
+        super().__init__()
 
         # Encoder
         self.encoder = nn.Sequential(
             nn.Linear(input_size, hidden_size),
             nn.ReLU(inplace=True),
             nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
 
         # Latent space
@@ -595,10 +608,10 @@ class VariationalAutoEncoder(nn.Module):
             nn.Linear(hidden_size, hidden_size),
             nn.ReLU(inplace=True),
             nn.Linear(hidden_size, input_size),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         )
 
-    def encode(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def encode(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         h = self.encoder(x)
         mu = self.mu_layer(h)
         logvar = self.logvar_layer(h)
@@ -612,7 +625,7 @@ class VariationalAutoEncoder(nn.Module):
     def decode(self, z: torch.Tensor) -> torch.Tensor:
         return self.decoder(z)
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         mu, logvar = self.encode(x)
         z = self.reparameterize(mu, logvar)
         recon = self.decode(z)
@@ -630,22 +643,29 @@ class Seq2SeqModel(nn.Module):
         embedding_dim: int,
         hidden_size: int,
         num_layers: int = 1,
-        dropout: float = 0.1
+        dropout: float = 0.1,
     ):
-        super(Seq2SeqModel, self).__init__()
+        super().__init__()
 
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
 
         # Encoder
         self.encoder = nn.LSTM(
-            embedding_dim, hidden_size, num_layers,
-            dropout=dropout, batch_first=True, bidirectional=True
+            embedding_dim,
+            hidden_size,
+            num_layers,
+            dropout=dropout,
+            batch_first=True,
+            bidirectional=True,
         )
 
         # Decoder
         self.decoder = nn.LSTM(
-            embedding_dim + hidden_size * 2, hidden_size, num_layers,
-            dropout=dropout, batch_first=True
+            embedding_dim + hidden_size * 2,
+            hidden_size,
+            num_layers,
+            dropout=dropout,
+            batch_first=True,
         )
 
         # Attention
@@ -675,7 +695,7 @@ class Seq2SeqModel(nn.Module):
             context = torch.sum(attention_weights.unsqueeze(2) * encoder_outputs, dim=1)
 
             # Decoder step
-            decoder_input = torch.cat([tgt_emb[:, i:i+1, :], context.unsqueeze(1)], dim=2)
+            decoder_input = torch.cat([tgt_emb[:, i : i + 1, :], context.unsqueeze(1)], dim=2)
             decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
 
             # Output projection

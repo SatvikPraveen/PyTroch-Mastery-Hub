@@ -7,13 +7,13 @@ __version__ = "1.0.0"
 __author__ = "Satvik Praveen"
 
 # Make key utilities available at package level
-from .utils.visualization import plot_training_curves, plot_tensor_as_image
-from .utils.data_utils import load_dataset, create_data_loaders
+from .utils.data_utils import create_data_loaders, load_dataset
 from .utils.metrics import accuracy, precision_recall_f1
+from .utils.visualization import plot_tensor_as_image, plot_training_curves
 
 __all__ = [
     "plot_training_curves",
-    "plot_tensor_as_image", 
+    "plot_tensor_as_image",
     "load_dataset",
     "create_data_loaders",
     "accuracy",

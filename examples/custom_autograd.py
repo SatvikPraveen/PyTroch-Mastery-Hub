@@ -6,8 +6,8 @@ torch.autograd.Function. Uses helpers from pytorch_mastery_hub.fundamentals.auto
 Run: python examples/custom_autograd.py
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
@@ -15,11 +15,10 @@ import torch
 import torch.nn as nn
 
 from pytorch_mastery_hub.fundamentals.autograd_helpers import (
+    GradientClipping,
     LinearFunction,
     ReLUFunction,
-    SigmoidFunction,
     gradient_check,
-    GradientClipping,
 )
 
 
@@ -66,7 +65,7 @@ def demo_gradient_check():
     print("\n── Gradient Check ─────────────────────────────────────")
 
     def simple_func(x):
-        return (x ** 3).sum()
+        return (x**3).sum()
 
     x = torch.randn(4, requires_grad=True, dtype=torch.float64)
     passed = gradient_check(simple_func, x, eps=1e-5, tol=1e-4)
@@ -77,7 +76,6 @@ def demo_gradient_clipping():
     """Gradient clipping during training."""
     print("\n── Gradient Clipping ──────────────────────────────────")
     model = nn.Linear(10, 5)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
     clipper = GradientClipping(max_norm=1.0)
 
     x = torch.randn(32, 10)
@@ -86,13 +84,13 @@ def demo_gradient_clipping():
     loss.backward()
 
     # Check norms before and after clipping
-    norm_before = sum(
-        p.grad.norm().item() ** 2 for p in model.parameters() if p.grad is not None
-    ) ** 0.5
+    norm_before = (
+        sum(p.grad.norm().item() ** 2 for p in model.parameters() if p.grad is not None) ** 0.5
+    )
     clipper.clip(model.parameters())
-    norm_after = sum(
-        p.grad.norm().item() ** 2 for p in model.parameters() if p.grad is not None
-    ) ** 0.5
+    norm_after = (
+        sum(p.grad.norm().item() ** 2 for p in model.parameters() if p.grad is not None) ** 0.5
+    )
 
     print(f"  Gradient norm before clipping : {norm_before:.4f}")
     print(f"  Gradient norm after  clipping : {norm_after:.4f}")

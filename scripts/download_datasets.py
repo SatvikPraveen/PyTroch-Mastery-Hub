@@ -7,14 +7,13 @@ Usage:
     python scripts/download_datasets.py --list
 """
 
+import argparse
 import os
 import sys
-import argparse
 
 # Ensure src/ is importable when run from project root
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import torch
 import torchvision
 import torchvision.transforms as transforms
 
@@ -30,37 +29,45 @@ AVAILABLE_DATASETS = {
 
 def download_mnist(data_dir: str):
     print("  Downloading MNIST...")
-    torchvision.datasets.MNIST(root=data_dir, train=True, download=True,
-                               transform=transforms.ToTensor())
-    torchvision.datasets.MNIST(root=data_dir, train=False, download=True,
-                               transform=transforms.ToTensor())
+    torchvision.datasets.MNIST(
+        root=data_dir, train=True, download=True, transform=transforms.ToTensor()
+    )
+    torchvision.datasets.MNIST(
+        root=data_dir, train=False, download=True, transform=transforms.ToTensor()
+    )
     print("  ✓ MNIST downloaded")
 
 
 def download_fashion_mnist(data_dir: str):
     print("  Downloading Fashion-MNIST...")
-    torchvision.datasets.FashionMNIST(root=data_dir, train=True, download=True,
-                                      transform=transforms.ToTensor())
-    torchvision.datasets.FashionMNIST(root=data_dir, train=False, download=True,
-                                      transform=transforms.ToTensor())
+    torchvision.datasets.FashionMNIST(
+        root=data_dir, train=True, download=True, transform=transforms.ToTensor()
+    )
+    torchvision.datasets.FashionMNIST(
+        root=data_dir, train=False, download=True, transform=transforms.ToTensor()
+    )
     print("  ✓ Fashion-MNIST downloaded")
 
 
 def download_cifar10(data_dir: str):
     print("  Downloading CIFAR-10...")
-    torchvision.datasets.CIFAR10(root=data_dir, train=True, download=True,
-                                 transform=transforms.ToTensor())
-    torchvision.datasets.CIFAR10(root=data_dir, train=False, download=True,
-                                 transform=transforms.ToTensor())
+    torchvision.datasets.CIFAR10(
+        root=data_dir, train=True, download=True, transform=transforms.ToTensor()
+    )
+    torchvision.datasets.CIFAR10(
+        root=data_dir, train=False, download=True, transform=transforms.ToTensor()
+    )
     print("  ✓ CIFAR-10 downloaded")
 
 
 def download_cifar100(data_dir: str):
     print("  Downloading CIFAR-100...")
-    torchvision.datasets.CIFAR100(root=data_dir, train=True, download=True,
-                                  transform=transforms.ToTensor())
-    torchvision.datasets.CIFAR100(root=data_dir, train=False, download=True,
-                                  transform=transforms.ToTensor())
+    torchvision.datasets.CIFAR100(
+        root=data_dir, train=True, download=True, transform=transforms.ToTensor()
+    )
+    torchvision.datasets.CIFAR100(
+        root=data_dir, train=False, download=True, transform=transforms.ToTensor()
+    )
     print("  ✓ CIFAR-100 downloaded")
 
 
@@ -73,9 +80,7 @@ DOWNLOAD_FUNCTIONS = {
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Download datasets for PyTorch Mastery Hub"
-    )
+    parser = argparse.ArgumentParser(description="Download datasets for PyTorch Mastery Hub")
     parser.add_argument(
         "--datasets",
         nargs="+",

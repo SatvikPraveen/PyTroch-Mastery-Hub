@@ -3,13 +3,13 @@
 Custom image transforms for PyTorch Mastery Hub
 """
 
+import random
+
+import numpy as np
 import torch
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as TF
 from PIL import Image, ImageFilter
-import random
-import numpy as np
-from typing import Tuple, Optional, Union, List
 
 
 def get_train_transforms(input_size: int = 224, normalize: bool = True) -> transforms.Compose:
@@ -29,7 +29,7 @@ def get_train_transforms(input_size: int = 224, normalize: bool = True) -> trans
         transforms.RandomHorizontalFlip(0.5),
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
         transforms.RandomRotation(10),
-        transforms.ToTensor()
+        transforms.ToTensor(),
     ]
 
     if normalize:
@@ -51,10 +51,7 @@ def get_val_transforms(input_size: int = 224, normalize: bool = True) -> transfo
     Returns:
         Composed transforms
     """
-    transform_list = [
-        transforms.Resize((input_size, input_size)),
-        transforms.ToTensor()
-    ]
+    transform_list = [transforms.Resize((input_size, input_size)), transforms.ToTensor()]
 
     if normalize:
         transform_list.append(
@@ -69,7 +66,7 @@ class RandomRotation(torch.nn.Module):
     Custom random rotation transform.
     """
 
-    def __init__(self, degrees: Union[float, Tuple[float, float]], p: float = 1.0):
+    def __init__(self, degrees: float | tuple[float, float], p: float = 1.0):
         super().__init__()
         self.degrees = degrees if isinstance(degrees, tuple) else (-degrees, degrees)
         self.p = p
@@ -86,14 +83,14 @@ class RandomCrop(torch.nn.Module):
     Custom random crop transform with padding.
     """
 
-    def __init__(self, size: Union[int, Tuple[int, int]], padding: Optional[int] = None):
+    def __init__(self, size: int | tuple[int, int], padding: int | None = None):
         super().__init__()
         self.size = (size, size) if isinstance(size, int) else size
         self.padding = padding
 
     def forward(self, img: Image.Image) -> Image.Image:
         if self.padding:
-            img = TF.pad(img, self.padding, fill=0, padding_mode='constant')
+            img = TF.pad(img, self.padding, fill=0, padding_mode="constant")
 
         i, j, h, w = transforms.RandomCrop.get_params(img, self.size)
         return TF.crop(img, i, j, h, w)
@@ -110,7 +107,7 @@ class ColorJitter(torch.nn.Module):
         contrast: float = 0,
         saturation: float = 0,
         hue: float = 0,
-        p: float = 1.0
+        p: float = 1.0,
     ):
         super().__init__()
         self.brightness = brightness
@@ -131,7 +128,7 @@ class GaussianBlur(torch.nn.Module):
     Gaussian blur transform.
     """
 
-    def __init__(self, radius: Union[float, Tuple[float, float]] = 1.0, p: float = 0.5):
+    def __init__(self, radius: float | tuple[float, float] = 1.0, p: float = 0.5):
         super().__init__()
         self.radius = radius if isinstance(radius, tuple) else (0.1, radius)
         self.p = p
@@ -151,9 +148,9 @@ class RandomErasing(torch.nn.Module):
     def __init__(
         self,
         p: float = 0.5,
-        scale: Tuple[float, float] = (0.02, 0.33),
-        ratio: Tuple[float, float] = (0.3, 3.3),
-        value: Union[int, str] = 0
+        scale: tuple[float, float] = (0.02, 0.33),
+        ratio: tuple[float, float] = (0.3, 3.3),
+        value: int | str = 0,
     ):
         super().__init__()
         self.p = p
@@ -166,7 +163,7 @@ class RandomErasing(torch.nn.Module):
             return TF.erase(tensor, *self._get_params(tensor), self.value)
         return tensor
 
-    def _get_params(self, tensor: torch.Tensor) -> Tuple[int, int, int, int]:
+    def _get_params(self, tensor: torch.Tensor) -> tuple[int, int, int, int]:
         img_c, img_h, img_w = tensor.shape
         area = img_h * img_w
 
@@ -174,8 +171,8 @@ class RandomErasing(torch.nn.Module):
             target_area = random.uniform(*self.scale) * area
             aspect_ratio = random.uniform(*self.ratio)
 
-            h = int(round(np.sqrt(target_area * aspect_ratio)))
-            w = int(round(np.sqrt(target_area / aspect_ratio)))
+            h = round(np.sqrt(target_area * aspect_ratio))
+            w = round(np.sqrt(target_area / aspect_ratio))
 
             if w < img_w and h < img_h:
                 i = random.randint(0, img_h - h)
@@ -192,12 +189,7 @@ class GridMask(torch.nn.Module):
     """
 
     def __init__(
-        self,
-        d1: int = 96,
-        d2: int = 224,
-        rotate: int = 45,
-        ratio: float = 0.6,
-        p: float = 0.5
+        self, d1: int = 96, d2: int = 224, rotate: int = 45, ratio: float = 0.6, p: float = 0.5
     ):
         super().__init__()
         self.d1 = d1
@@ -236,7 +228,9 @@ class MixUp(torch.nn.Module):
         self.alpha = alpha
         self.beta_dist = torch.distributions.Beta(alpha, alpha) if alpha > 0 else None
 
-    def forward(self, batch: torch.Tensor, targets: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self, batch: torch.Tensor, targets: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         batch_size = batch.size(0)
 
         if self.alpha <= 0 or self.beta_dist is None:
@@ -268,7 +262,9 @@ class CutMix(torch.nn.Module):
         self.prob = prob
         self.beta_dist = torch.distributions.Beta(alpha, alpha) if alpha > 0 else None
 
-    def forward(self, batch: torch.Tensor, targets: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self, batch: torch.Tensor, targets: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         batch_size = batch.size(0)
 
         if self.alpha <= 0 or self.beta_dist is None or np.random.random() > self.prob:
@@ -278,7 +274,7 @@ class CutMix(torch.nn.Module):
 
         # Get random patch
         W, H = batch.shape[2:]
-        cut_rat = np.sqrt(1. - lam)
+        cut_rat = np.sqrt(1.0 - lam)
         cut_w = int(W * cut_rat)
         cut_h = int(H * cut_rat)
 
@@ -315,7 +311,7 @@ class CustomTransform(torch.nn.Module):
         super().__init__()
         self.p = p
 
-    def forward(self, img: Union[Image.Image, torch.Tensor]) -> Union[Image.Image, torch.Tensor]:
+    def forward(self, img: Image.Image | torch.Tensor) -> Image.Image | torch.Tensor:
         if random.random() < self.p:
             # Implement your custom transformation here
             pass
@@ -327,7 +323,7 @@ class Compose:
     Custom compose class for chaining transforms.
     """
 
-    def __init__(self, transforms: List[torch.nn.Module]):
+    def __init__(self, transforms: list[torch.nn.Module]):
         self.transforms = transforms
 
     def __call__(self, img):
@@ -336,14 +332,14 @@ class Compose:
         return img
 
     def __repr__(self):
-        format_string = self.__class__.__name__ + '('
+        format_string = self.__class__.__name__ + "("
         for t in self.transforms:
-            format_string += '\n    {0}'.format(t)
-        format_string += '\n)'
+            format_string += f"\n    {t}"
+        format_string += "\n)"
         return format_string
 
 
-def get_advanced_transforms(input_size: int = 224, phase: str = 'train') -> transforms.Compose:
+def get_advanced_transforms(input_size: int = 224, phase: str = "train") -> transforms.Compose:
     """
     Get advanced transforms with modern augmentation techniques.
 
@@ -354,16 +350,18 @@ def get_advanced_transforms(input_size: int = 224, phase: str = 'train') -> tran
     Returns:
         Composed transforms
     """
-    if phase == 'train':
-        return transforms.Compose([
-            transforms.Resize((input_size + 32, input_size + 32)),
-            transforms.RandomCrop(input_size),
-            transforms.RandomHorizontalFlip(0.5),
-            ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.1, p=0.8),
-            GaussianBlur(radius=2.0, p=0.5),
-            transforms.ToTensor(),
-            RandomErasing(p=0.25),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
+    if phase == "train":
+        return transforms.Compose(
+            [
+                transforms.Resize((input_size + 32, input_size + 32)),
+                transforms.RandomCrop(input_size),
+                transforms.RandomHorizontalFlip(0.5),
+                ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.1, p=0.8),
+                GaussianBlur(radius=2.0, p=0.5),
+                transforms.ToTensor(),
+                RandomErasing(p=0.25),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ]
+        )
     else:
         return get_val_transforms(input_size, normalize=True)

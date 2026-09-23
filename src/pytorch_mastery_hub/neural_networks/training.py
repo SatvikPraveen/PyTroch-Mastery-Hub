@@ -3,14 +3,16 @@
 Training utilities for PyTorch Mastery Hub
 """
 
+import time
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any
+
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from typing import Dict, List, Optional, Callable, Any, Tuple
-import time
-from pathlib import Path
-from ..utils.metrics import AverageMeter, MetricTracker
-from ..utils.io_utils import save_checkpoint
+
+from ..utils.metrics import MetricTracker
 
 
 def train_epoch(
@@ -19,10 +21,10 @@ def train_epoch(
     criterion: nn.Module,
     optimizer: torch.optim.Optimizer,
     device: torch.device,
-    scheduler: Optional[Any] = None,
-    clip_grad_norm: Optional[float] = None,
-    accumulation_steps: int = 1
-) -> Dict[str, float]:
+    scheduler: Any | None = None,
+    clip_grad_norm: float | None = None,
+    accumulation_steps: int = 1,
+) -> dict[str, float]:
     """
     Train model for one epoch.
 
@@ -40,7 +42,7 @@ def train_epoch(
         Dictionary with training metrics
     """
     model.train()
-    metrics = MetricTracker(['loss', 'accuracy'])
+    metrics = MetricTracker(["loss", "accuracy"])
 
     optimizer.zero_grad()
 
@@ -63,7 +65,7 @@ def train_epoch(
         if output.dim() > 1 and output.size(1) > 1:
             pred = output.argmax(dim=1, keepdim=True)
             correct = pred.eq(target.view_as(pred)).sum().item()
-            accuracy = 100. * correct / batch_size
+            accuracy = 100.0 * correct / batch_size
             metrics.update(accuracy=accuracy)
 
         # Gradient accumulation and optimization step
@@ -92,8 +94,8 @@ def validate_epoch(
     dataloader: DataLoader,
     criterion: nn.Module,
     device: torch.device,
-    compute_metrics: Optional[Callable] = None
-) -> Dict[str, float]:
+    compute_metrics: Callable | None = None,
+) -> dict[str, float]:
     """
     Validate model for one epoch.
 
@@ -108,7 +110,7 @@ def validate_epoch(
         Dictionary with validation metrics
     """
     model.eval()
-    metrics = MetricTracker(['loss', 'accuracy'])
+    metrics = MetricTracker(["loss", "accuracy"])
 
     all_outputs = []
     all_targets = []
@@ -129,7 +131,7 @@ def validate_epoch(
             if output.dim() > 1 and output.size(1) > 1:
                 pred = output.argmax(dim=1, keepdim=True)
                 correct = pred.eq(target.view_as(pred)).sum().item()
-                accuracy = 100. * correct / batch_size
+                accuracy = 100.0 * correct / batch_size
                 metrics.update(accuracy=accuracy)
 
             # Store for additional metrics
@@ -159,9 +161,9 @@ class Trainer:
         criterion: nn.Module,
         optimizer: torch.optim.Optimizer,
         device: torch.device,
-        scheduler: Optional[Any] = None,
-        clip_grad_norm: Optional[float] = None,
-        accumulation_steps: int = 1
+        scheduler: Any | None = None,
+        clip_grad_norm: float | None = None,
+        accumulation_steps: int = 1,
     ):
         self.model = model
         self.criterion = criterion
@@ -172,7 +174,7 @@ class Trainer:
         self.accumulation_steps = accumulation_steps
 
         self.callbacks = []
-        self.history = {'train': {}, 'val': {}}
+        self.history = {"train": {}, "val": {}}
         self.current_epoch = 0
 
     def add_callback(self, callback):
@@ -182,10 +184,10 @@ class Trainer:
     def fit(
         self,
         train_loader: DataLoader,
-        val_loader: Optional[DataLoader] = None,
+        val_loader: DataLoader | None = None,
         epochs: int = 10,
-        verbose: bool = True
-    ) -> Dict[str, List[float]]:
+        verbose: bool = True,
+    ) -> dict[str, list[float]]:
         """
         Train the model.
 
@@ -206,30 +208,34 @@ class Trainer:
 
             # Training phase
             train_metrics = train_epoch(
-                self.model, train_loader, self.criterion, self.optimizer,
-                self.device, self.scheduler, self.clip_grad_norm, self.accumulation_steps
+                self.model,
+                train_loader,
+                self.criterion,
+                self.optimizer,
+                self.device,
+                self.scheduler,
+                self.clip_grad_norm,
+                self.accumulation_steps,
             )
 
             # Validation phase
             val_metrics = {}
             if val_loader is not None:
-                val_metrics = validate_epoch(
-                    self.model, val_loader, self.criterion, self.device
-                )
+                val_metrics = validate_epoch(self.model, val_loader, self.criterion, self.device)
 
             # Update history
             for key, value in train_metrics.items():
-                if key not in self.history['train']:
-                    self.history['train'][key] = []
-                self.history['train'][key].append(value)
+                if key not in self.history["train"]:
+                    self.history["train"][key] = []
+                self.history["train"][key].append(value)
 
             for key, value in val_metrics.items():
-                if key not in self.history['val']:
-                    self.history['val'][key] = []
-                self.history['val'][key].append(value)
+                if key not in self.history["val"]:
+                    self.history["val"][key] = []
+                self.history["val"][key].append(value)
 
             # Execute callbacks
-            logs = {'train': train_metrics, 'val': val_metrics, 'epoch': epoch}
+            logs = {"train": train_metrics, "val": val_metrics, "epoch": epoch}
             for callback in self.callbacks:
                 callback.on_epoch_end(logs)
 
@@ -239,7 +245,7 @@ class Trainer:
                 self._print_epoch_results(epoch, epochs, train_metrics, val_metrics, epoch_time)
 
             # Check for early stopping
-            should_stop = any(getattr(cb, 'stop_training', False) for cb in self.callbacks)
+            should_stop = any(getattr(cb, "stop_training", False) for cb in self.callbacks)
             if should_stop:
                 print(f"Early stopping at epoch {epoch + 1}")
                 break
@@ -265,11 +271,11 @@ class EarlyStoppingCallback:
 
     def __init__(
         self,
-        monitor: str = 'val_loss',
+        monitor: str = "val_loss",
         patience: int = 10,
         min_delta: float = 0,
-        mode: str = 'min',
-        restore_best_weights: bool = True
+        mode: str = "min",
+        restore_best_weights: bool = True,
     ):
         self.monitor = monitor
         self.patience = patience
@@ -282,16 +288,16 @@ class EarlyStoppingCallback:
         self.stop_training = False
         self.best_weights = None
 
-        if mode == 'min':
+        if mode == "min":
             self.monitor_op = lambda current, best: current < best - min_delta
-            self.best_score = float('inf')
+            self.best_score = float("inf")
         else:
             self.monitor_op = lambda current, best: current > best + min_delta
-            self.best_score = float('-inf')
+            self.best_score = float("-inf")
 
     def on_epoch_end(self, logs):
         """Called at the end of each epoch."""
-        current_score = logs['val'].get(self.monitor.replace('val_', ''))
+        current_score = logs["val"].get(self.monitor.replace("val_", ""))
 
         if current_score is None:
             return
@@ -300,7 +306,9 @@ class EarlyStoppingCallback:
             self.best_score = current_score
             self.wait = 0
             if self.restore_best_weights:
-                self.best_weights = {k: v.clone() for k, v in logs.get('model', {}).state_dict().items()}
+                self.best_weights = {
+                    k: v.clone() for k, v in logs.get("model", {}).state_dict().items()
+                }
         else:
             self.wait += 1
             if self.wait >= self.patience:
@@ -315,10 +323,10 @@ class ModelCheckpointCallback:
     def __init__(
         self,
         filepath: str,
-        monitor: str = 'val_loss',
-        mode: str = 'min',
+        monitor: str = "val_loss",
+        mode: str = "min",
         save_best_only: bool = True,
-        verbose: bool = True
+        verbose: bool = True,
     ):
         self.filepath = Path(filepath)
         self.monitor = monitor
@@ -326,16 +334,16 @@ class ModelCheckpointCallback:
         self.save_best_only = save_best_only
         self.verbose = verbose
 
-        if mode == 'min':
+        if mode == "min":
             self.monitor_op = lambda current, best: current < best
-            self.best_score = float('inf')
+            self.best_score = float("inf")
         else:
             self.monitor_op = lambda current, best: current > best
-            self.best_score = float('-inf')
+            self.best_score = float("-inf")
 
     def on_epoch_end(self, logs):
         """Called at the end of each epoch."""
-        current_score = logs['val'].get(self.monitor.replace('val_', ''))
+        current_score = logs["val"].get(self.monitor.replace("val_", ""))
 
         if current_score is None:
             return
@@ -345,7 +353,7 @@ class ModelCheckpointCallback:
                 self.best_score = current_score
 
             # Save checkpoint
-            filepath = str(self.filepath).format(epoch=logs['epoch'], **logs['val'])
+            filepath = str(self.filepath).format(epoch=logs["epoch"], **logs["val"])
             # Note: In a real implementation, you'd pass the model here
             if self.verbose:
                 print(f"Saved model checkpoint to {filepath}")
@@ -354,15 +362,15 @@ class ModelCheckpointCallback:
 class LearningRateSchedulerCallback:
     """Learning rate scheduler callback."""
 
-    def __init__(self, scheduler, monitor: str = 'val_loss'):
+    def __init__(self, scheduler, monitor: str = "val_loss"):
         self.scheduler = scheduler
         self.monitor = monitor
 
     def on_epoch_end(self, logs):
         """Called at the end of each epoch."""
-        if hasattr(self.scheduler, 'step'):
-            if 'ReduceLROnPlateau' in str(type(self.scheduler)):
-                metric = logs['val'].get(self.monitor.replace('val_', ''))
+        if hasattr(self.scheduler, "step"):
+            if "ReduceLROnPlateau" in str(type(self.scheduler)):
+                metric = logs["val"].get(self.monitor.replace("val_", ""))
                 if metric is not None:
                     self.scheduler.step(metric)
             else:
@@ -377,10 +385,10 @@ class ProgressCallback:
 
     def on_epoch_end(self, logs):
         """Called at the end of each epoch."""
-        epoch = logs['epoch']
+        epoch = logs["epoch"]
         if epoch % self.print_freq == 0:
-            train_metrics = logs.get('train', {})
-            val_metrics = logs.get('val', {})
+            train_metrics = logs.get("train", {})
+            val_metrics = logs.get("val", {})
 
             metrics_str = ""
             for key, value in train_metrics.items():
@@ -398,8 +406,8 @@ def train_with_mixed_precision(
     criterion: nn.Module,
     optimizer: torch.optim.Optimizer,
     device: torch.device,
-    scaler: torch.cuda.amp.GradScaler
-) -> Dict[str, float]:
+    scaler: torch.cuda.amp.GradScaler,
+) -> dict[str, float]:
     """
     Train with automatic mixed precision.
 
@@ -415,7 +423,7 @@ def train_with_mixed_precision(
         Training metrics
     """
     model.train()
-    metrics = MetricTracker(['loss', 'accuracy'])
+    metrics = MetricTracker(["loss", "accuracy"])
 
     for data, target in train_loader:
         data, target = data.to(device), target.to(device)
@@ -439,7 +447,7 @@ def train_with_mixed_precision(
         if output.dim() > 1 and output.size(1) > 1:
             pred = output.argmax(dim=1, keepdim=True)
             correct = pred.eq(target.view_as(pred)).sum().item()
-            accuracy = 100. * correct / batch_size
+            accuracy = 100.0 * correct / batch_size
             metrics.update(accuracy=accuracy)
 
     return metrics.get_averages()

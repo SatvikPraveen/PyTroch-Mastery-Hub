@@ -6,8 +6,8 @@ smaller student model using pytorch_mastery_hub.advanced.optimization.KnowledgeD
 Run: python examples/knowledge_distillation.py
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
@@ -15,8 +15,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from pytorch_mastery_hub.neural_networks.models import SimpleMLP
 from pytorch_mastery_hub.advanced.optimization import KnowledgeDistillation
+from pytorch_mastery_hub.neural_networks.models import SimpleMLP
 from pytorch_mastery_hub.utils.metrics import accuracy
 
 
@@ -30,8 +30,11 @@ def main():
     print("=" * 60)
 
     device = torch.device(
-        "mps" if torch.backends.mps.is_available() else
-        "cuda" if torch.cuda.is_available() else "cpu"
+        "mps"
+        if torch.backends.mps.is_available()
+        else "cuda"
+        if torch.cuda.is_available()
+        else "cpu"
     )
     print(f"\nDevice: {device}")
 
@@ -42,9 +45,7 @@ def main():
     train_loader = DataLoader(
         TensorDataset(x_data[:split], y_data[:split]), batch_size=32, shuffle=True
     )
-    val_loader = DataLoader(
-        TensorDataset(x_data[split:], y_data[split:]), batch_size=32
-    )
+    val_loader = DataLoader(TensorDataset(x_data[split:], y_data[split:]), batch_size=32)
 
     # ── Teacher model (large) ─────────────────────────────────────
     teacher = SimpleMLP(input_dim=64, hidden_dims=[256, 256, 128], output_dim=5).to(device)
@@ -74,8 +75,10 @@ def main():
     # ── Student model (small) ─────────────────────────────────────
     student_scratch = SimpleMLP(input_dim=64, hidden_dims=[64], output_dim=5).to(device)
     student_distill = SimpleMLP(input_dim=64, hidden_dims=[64], output_dim=5).to(device)
-    print(f"\nStudent params : {model_param_count(student_scratch):,}  "
-          f"({100*model_param_count(student_scratch)/model_param_count(teacher):.1f}% of teacher)")
+    print(
+        f"\nStudent params : {model_param_count(student_scratch):,}  "
+        f"({100 * model_param_count(student_scratch) / model_param_count(teacher):.1f}% of teacher)"
+    )
 
     # ── Train student from scratch ────────────────────────────────
     print("\nTraining student from scratch (5 epochs)...")
@@ -103,7 +106,7 @@ def main():
         teacher=teacher,
         student=student_distill,
         temperature=4.0,
-        alpha=0.5,         # blend factor: 0.5 CE + 0.5 KD loss
+        alpha=0.5,  # blend factor: 0.5 CE + 0.5 KD loss
     )
     d_optimizer = torch.optim.Adam(student_distill.parameters(), lr=1e-3)
 
@@ -130,12 +133,16 @@ def main():
     # ── Summary ──────────────────────────────────────────────────
     print("\n── Summary ──────────────────────────────────────────────")
     print(f"  {'Model':<30} {'Params':>8} {'Val Accuracy':>14}")
-    print(f"  {'-'*52}")
+    print(f"  {'-' * 52}")
     print(f"  {'Teacher (large)':<30} {model_param_count(teacher):>8,} {teacher_acc:>14.2%}")
-    print(f"  {'Student (trained scratch)':<30} {model_param_count(student_scratch):>8,} "
-          f"{scratch_acc:>14.2%}")
-    print(f"  {'Student (distilled)':<30} {model_param_count(student_distill):>8,} "
-          f"{distill_acc:>14.2%}")
+    print(
+        f"  {'Student (trained scratch)':<30} {model_param_count(student_scratch):>8,} "
+        f"{scratch_acc:>14.2%}"
+    )
+    print(
+        f"  {'Student (distilled)':<30} {model_param_count(student_distill):>8,} "
+        f"{distill_acc:>14.2%}"
+    )
 
     improvement = distill_acc - scratch_acc
     print(f"\n  Distillation improvement: {improvement:+.2%}")

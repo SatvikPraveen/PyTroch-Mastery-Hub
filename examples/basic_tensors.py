@@ -5,15 +5,18 @@ Demonstrates the core tensor operations available in PyTorch Mastery Hub.
 Run: python examples/basic_tensors.py
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
 import torch
-import numpy as np
 
-from pytorch_mastery_hub.fundamentals.tensor_ops import safe_divide, batch_matrix_multiply, tensor_stats
+from pytorch_mastery_hub.fundamentals.tensor_ops import (
+    batch_matrix_multiply,
+    safe_divide,
+    tensor_stats,
+)
 
 
 def main():
@@ -51,16 +54,21 @@ def main():
 
     # ── 4. Batch matrix multiply ─────────────────────────────────
     print("\n4. Batch Matrix Multiply")
-    batch_a = torch.randn(8, 4, 6)   # 8 matrices of shape 4×6
-    batch_b = torch.randn(8, 6, 3)   # 8 matrices of shape 6×3
+    batch_a = torch.randn(8, 4, 6)  # 8 matrices of shape 4×6
+    batch_b = torch.randn(8, 6, 3)  # 8 matrices of shape 6×3
     result = batch_matrix_multiply(batch_a, batch_b)
     print(f"   input shapes : {batch_a.shape}, {batch_b.shape}")
     print(f"   output shape : {result.shape}  (expected: torch.Size([8, 4, 3]))")
 
     # ── 5. Device placement ──────────────────────────────────────
     print("\n5. Device Information")
-    device = "mps" if torch.backends.mps.is_available() else \
-             "cuda" if torch.cuda.is_available() else "cpu"
+    device = (
+        "mps"
+        if torch.backends.mps.is_available()
+        else "cuda"
+        if torch.cuda.is_available()
+        else "cpu"
+    )
     print(f"   Best available device: {device}")
     t = torch.randn(3, 3).to(device)
     print(f"   Tensor on {t.device}")
@@ -68,7 +76,7 @@ def main():
     # ── 6. Autograd ──────────────────────────────────────────────
     print("\n6. Autograd Example")
     x = torch.tensor(3.0, requires_grad=True)
-    y = x ** 2 + 2 * x + 1   # y = (x+1)^2
+    y = x**2 + 2 * x + 1  # y = (x+1)^2
     y.backward()
     print(f"   y  = x² + 2x + 1  at x=3  → y = {y.item():.1f}")
     print(f"   dy/dx at x=3      → {x.grad.item():.1f}  (expected: 8.0 = 2*3+2)")

@@ -3,18 +3,17 @@
 GAN utilities for PyTorch Mastery Hub
 """
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import Tuple, Optional, Dict, Any
-import numpy as np
 
 
 class Generator(nn.Module):
     """Basic Generator for GAN."""
 
     def __init__(self, noise_dim: int, output_dim: int, hidden_dims: list = [256, 512, 1024]):
-        super(Generator, self).__init__()
+        super().__init__()
 
         if noise_dim <= 0:
             raise ValueError(f"noise_dim must be positive, got {noise_dim}")
@@ -26,18 +25,17 @@ class Generator(nn.Module):
 
         # Hidden layers
         for hidden_dim in hidden_dims:
-            layers.extend([
-                nn.Linear(input_dim, hidden_dim),
-                nn.BatchNorm1d(hidden_dim),
-                nn.ReLU(inplace=True)
-            ])
+            layers.extend(
+                [
+                    nn.Linear(input_dim, hidden_dim),
+                    nn.BatchNorm1d(hidden_dim),
+                    nn.ReLU(inplace=True),
+                ]
+            )
             input_dim = hidden_dim
 
         # Output layer
-        layers.extend([
-            nn.Linear(input_dim, output_dim),
-            nn.Tanh()
-        ])
+        layers.extend([nn.Linear(input_dim, output_dim), nn.Tanh()])
 
         self.model = nn.Sequential(*layers)
         self._initialize_weights()
@@ -57,18 +55,20 @@ class Discriminator(nn.Module):
     """Basic Discriminator for GAN."""
 
     def __init__(self, input_dim: int, hidden_dims: list = [1024, 512, 256]):
-        super(Discriminator, self).__init__()
+        super().__init__()
 
         layers = []
         current_dim = input_dim
 
         # Hidden layers
         for hidden_dim in hidden_dims:
-            layers.extend([
-                nn.Linear(current_dim, hidden_dim),
-                nn.LeakyReLU(0.2, inplace=True),
-                nn.Dropout(0.3)
-            ])
+            layers.extend(
+                [
+                    nn.Linear(current_dim, hidden_dim),
+                    nn.LeakyReLU(0.2, inplace=True),
+                    nn.Dropout(0.3),
+                ]
+            )
             current_dim = hidden_dim
 
         # Output layer
@@ -92,7 +92,7 @@ class DCGAN(nn.Module):
     """Deep Convolutional GAN."""
 
     def __init__(self, noise_dim: int = 100, img_channels: int = 3, feature_maps: int = 64):
-        super(DCGAN, self).__init__()
+        super().__init__()
         self.generator = DCGANGenerator(noise_dim, img_channels, feature_maps)
         self.discriminator = DCGANDiscriminator(img_channels, feature_maps)
 
@@ -104,32 +104,28 @@ class DCGANGenerator(nn.Module):
     """DCGAN Generator."""
 
     def __init__(self, noise_dim: int, img_channels: int, feature_maps: int):
-        super(DCGANGenerator, self).__init__()
+        super().__init__()
 
         self.model = nn.Sequential(
             # Input: noise_dim
             nn.ConvTranspose2d(noise_dim, feature_maps * 8, 4, 1, 0, bias=False),
             nn.BatchNorm2d(feature_maps * 8),
             nn.ReLU(inplace=True),
-
             # State: (feature_maps*8) x 4 x 4
             nn.ConvTranspose2d(feature_maps * 8, feature_maps * 4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(feature_maps * 4),
             nn.ReLU(inplace=True),
-
             # State: (feature_maps*4) x 8 x 8
             nn.ConvTranspose2d(feature_maps * 4, feature_maps * 2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(feature_maps * 2),
             nn.ReLU(inplace=True),
-
             # State: (feature_maps*2) x 16 x 16
             nn.ConvTranspose2d(feature_maps * 2, feature_maps, 4, 2, 1, bias=False),
             nn.BatchNorm2d(feature_maps),
             nn.ReLU(inplace=True),
-
             # State: feature_maps x 32 x 32
             nn.ConvTranspose2d(feature_maps, img_channels, 4, 2, 1, bias=False),
-            nn.Tanh()
+            nn.Tanh(),
             # Output: img_channels x 64 x 64
         )
 
@@ -154,28 +150,24 @@ class DCGANDiscriminator(nn.Module):
     """DCGAN Discriminator."""
 
     def __init__(self, img_channels: int, feature_maps: int):
-        super(DCGANDiscriminator, self).__init__()
+        super().__init__()
 
         self.model = nn.Sequential(
             # Input: img_channels x 64 x 64
             nn.Conv2d(img_channels, feature_maps, 4, 2, 1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
-
             # State: feature_maps x 32 x 32
             nn.Conv2d(feature_maps, feature_maps * 2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(feature_maps * 2),
             nn.LeakyReLU(0.2, inplace=True),
-
             # State: (feature_maps*2) x 16 x 16
             nn.Conv2d(feature_maps * 2, feature_maps * 4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(feature_maps * 4),
             nn.LeakyReLU(0.2, inplace=True),
-
             # State: (feature_maps*4) x 8 x 8
             nn.Conv2d(feature_maps * 4, feature_maps * 8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(feature_maps * 8),
             nn.LeakyReLU(0.2, inplace=True),
-
             # State: (feature_maps*8) x 4 x 4
             nn.Conv2d(feature_maps * 8, 1, 4, 1, 0, bias=False),
         )
@@ -198,7 +190,7 @@ class WGAN(nn.Module):
     """Wasserstein GAN implementation."""
 
     def __init__(self, noise_dim: int, output_dim: int):
-        super(WGAN, self).__init__()
+        super().__init__()
         self.generator = Generator(noise_dim, output_dim)
         self.critic = WGANCritic(output_dim)
 
@@ -210,16 +202,13 @@ class WGANCritic(nn.Module):
     """WGAN Critic (replaces discriminator)."""
 
     def __init__(self, input_dim: int, hidden_dims: list = [1024, 512, 256]):
-        super(WGANCritic, self).__init__()
+        super().__init__()
 
         layers = []
         current_dim = input_dim
 
         for hidden_dim in hidden_dims:
-            layers.extend([
-                nn.Linear(current_dim, hidden_dim),
-                nn.LeakyReLU(0.2, inplace=True)
-            ])
+            layers.extend([nn.Linear(current_dim, hidden_dim), nn.LeakyReLU(0.2, inplace=True)])
             current_dim = hidden_dim
 
         layers.append(nn.Linear(current_dim, 1))
@@ -243,7 +232,7 @@ def compute_gradient_penalty(
     real_samples: torch.Tensor,
     fake_samples: torch.Tensor,
     device: torch.device,
-    lambda_gp: float = 10.0
+    lambda_gp: float = 10.0,
 ) -> torch.Tensor:
     """
     Compute gradient penalty for WGAN-GP.
@@ -280,7 +269,7 @@ def compute_gradient_penalty(
         grad_outputs=torch.ones_like(critic_interpolates),
         create_graph=True,
         retain_graph=True,
-        only_inputs=True
+        only_inputs=True,
     )[0]
 
     # Compute gradient penalty
@@ -302,7 +291,7 @@ class GANTrainer:
         g_optimizer: torch.optim.Optimizer,
         d_optimizer: torch.optim.Optimizer,
         device: torch.device,
-        gan_type: str = 'vanilla'
+        gan_type: str = "vanilla",
     ):
         self.generator = generator
         self.discriminator = discriminator
@@ -311,12 +300,12 @@ class GANTrainer:
         self.device = device
         self.gan_type = gan_type
 
-        if gan_type == 'vanilla':
+        if gan_type == "vanilla":
             self.criterion = nn.BCEWithLogitsLoss()
-        elif gan_type == 'lsgan':
+        elif gan_type == "lsgan":
             self.criterion = nn.MSELoss()
 
-    def train_step(self, real_data: torch.Tensor, noise: torch.Tensor) -> Tuple[float, float]:
+    def train_step(self, real_data: torch.Tensor, noise: torch.Tensor) -> tuple[float, float]:
         """
         Perform one training step.
 
@@ -327,8 +316,6 @@ class GANTrainer:
         Returns:
             Tuple of (discriminator_loss, generator_loss)
         """
-        batch_size = real_data.size(0)
-
         # Train Discriminator
         self.d_optimizer.zero_grad()
 
@@ -340,7 +327,7 @@ class GANTrainer:
         fake_output = self.discriminator(fake_data)
 
         # Discriminator loss
-        if self.gan_type == 'vanilla':
+        if self.gan_type == "vanilla":
             real_labels = torch.ones_like(real_output)
             fake_labels = torch.zeros_like(fake_output)
 
@@ -348,25 +335,23 @@ class GANTrainer:
             d_loss_fake = self.criterion(fake_output, fake_labels)
             d_loss = (d_loss_real + d_loss_fake) / 2
 
-        elif self.gan_type == 'lsgan':
+        elif self.gan_type == "lsgan":
             d_loss_real = self.criterion(real_output, torch.ones_like(real_output))
             d_loss_fake = self.criterion(fake_output, torch.zeros_like(fake_output))
             d_loss = (d_loss_real + d_loss_fake) / 2
 
-        elif self.gan_type == 'wgan':
+        elif self.gan_type == "wgan":
             d_loss = -torch.mean(real_output) + torch.mean(fake_output)
 
-        elif self.gan_type == 'wgan-gp':
-            gp = compute_gradient_penalty(
-                self.discriminator, real_data, fake_data, self.device
-            )
+        elif self.gan_type == "wgan-gp":
+            gp = compute_gradient_penalty(self.discriminator, real_data, fake_data, self.device)
             d_loss = -torch.mean(real_output) + torch.mean(fake_output) + gp
 
         d_loss.backward()
         self.d_optimizer.step()
 
         # Clip weights for WGAN
-        if self.gan_type == 'wgan':
+        if self.gan_type == "wgan":
             for p in self.discriminator.parameters():
                 p.data.clamp_(-0.01, 0.01)
 
@@ -377,13 +362,9 @@ class GANTrainer:
         fake_output = self.discriminator(fake_data)
 
         # Generator loss
-        if self.gan_type == 'vanilla':
+        if self.gan_type == "vanilla" or self.gan_type == "lsgan":
             g_loss = self.criterion(fake_output, torch.ones_like(fake_output))
-        elif self.gan_type == 'lsgan':
-            g_loss = self.criterion(fake_output, torch.ones_like(fake_output))
-        elif self.gan_type == 'wgan':
-            g_loss = -torch.mean(fake_output)
-        elif self.gan_type == 'wgan-gp':
+        elif self.gan_type == "wgan" or self.gan_type == "wgan-gp":
             g_loss = -torch.mean(fake_output)
 
         g_loss.backward()
@@ -393,9 +374,7 @@ class GANTrainer:
 
 
 def gan_loss(
-    discriminator_output: torch.Tensor,
-    target_is_real: bool,
-    gan_mode: str = 'vanilla'
+    discriminator_output: torch.Tensor, target_is_real: bool, gan_mode: str = "vanilla"
 ) -> torch.Tensor:
     """
     Calculate GAN loss for generator and discriminator.
@@ -408,7 +387,7 @@ def gan_loss(
     Returns:
         GAN loss
     """
-    if gan_mode == 'vanilla':
+    if gan_mode == "vanilla":
         if target_is_real:
             loss = F.binary_cross_entropy_with_logits(
                 discriminator_output, torch.ones_like(discriminator_output)
@@ -418,13 +397,13 @@ def gan_loss(
                 discriminator_output, torch.zeros_like(discriminator_output)
             )
 
-    elif gan_mode == 'lsgan':
+    elif gan_mode == "lsgan":
         if target_is_real:
             loss = F.mse_loss(discriminator_output, torch.ones_like(discriminator_output))
         else:
             loss = F.mse_loss(discriminator_output, torch.zeros_like(discriminator_output))
 
-    elif gan_mode == 'wgan':
+    elif gan_mode == "wgan":
         if target_is_real:
             loss = -discriminator_output.mean()
         else:
@@ -437,10 +416,8 @@ def gan_loss(
 
 
 def calculate_inception_score(
-    images: torch.Tensor,
-    inception_model: nn.Module,
-    splits: int = 10
-) -> Tuple[float, float]:
+    images: torch.Tensor, inception_model: nn.Module, splits: int = 10
+) -> tuple[float, float]:
     """
     Calculate Inception Score for generated images.
 

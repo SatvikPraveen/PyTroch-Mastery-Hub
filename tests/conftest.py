@@ -3,19 +3,19 @@
 Pytest configuration and shared fixtures for PyTorch Mastery Hub tests
 """
 
+import tempfile
 from pathlib import Path
 
+import numpy as np
 import pytest
 import torch
-import numpy as np
 from PIL import Image
-import tempfile
 
 
 @pytest.fixture
 def device():
     """Get available device for testing."""
-    return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def sample_texts():
         "Here is another example sentence.",
         "Testing natural language processing is important.",
         "PyTorch makes deep learning accessible.",
-        "Machine learning models need proper testing."
+        "Machine learning models need proper testing.",
     ]
 
 
@@ -58,8 +58,15 @@ def sample_texts():
 def sample_vocab():
     """Sample vocabulary for testing."""
     return {
-        '<PAD>': 0, '<UNK>': 1, '<BOS>': 2, '<EOS>': 3,
-        'this': 4, 'is': 5, 'a': 6, 'test': 7, 'sentence': 8
+        "<PAD>": 0,
+        "<UNK>": 1,
+        "<BOS>": 2,
+        "<EOS>": 3,
+        "this": 4,
+        "is": 5,
+        "a": 6,
+        "test": 7,
+        "sentence": 8,
     }
 
 
@@ -87,11 +94,7 @@ def temp_dir():
 @pytest.fixture
 def sample_model():
     """Simple model for testing."""
-    return torch.nn.Sequential(
-        torch.nn.Linear(10, 20),
-        torch.nn.ReLU(),
-        torch.nn.Linear(20, 5)
-    )
+    return torch.nn.Sequential(torch.nn.Linear(10, 20), torch.nn.ReLU(), torch.nn.Linear(20, 5))
 
 
 @pytest.fixture
@@ -127,25 +130,19 @@ def set_random_seeds():
 def mock_config():
     """Mock configuration for testing."""
     return {
-        'model': {
-            'type': 'SimpleMLP',
-            'input_size': 10,
-            'hidden_sizes': [20, 15],
-            'output_size': 5
+        "model": {
+            "type": "SimpleMLP",
+            "input_size": 10,
+            "hidden_sizes": [20, 15],
+            "output_size": 5,
         },
-        'training': {
-            'batch_size': 32,
-            'learning_rate': 0.001,
-            'epochs': 10
-        }
+        "training": {"batch_size": 32, "learning_rate": 0.001, "epochs": 10},
     }
 
 
 # Skip GPU tests if CUDA is not available
 def pytest_configure(config):
-    config.addinivalue_line(
-        "markers", "gpu: mark test as requiring GPU"
-    )
+    config.addinivalue_line("markers", "gpu: mark test as requiring GPU")
 
 
 def pytest_collection_modifyitems(config, items):

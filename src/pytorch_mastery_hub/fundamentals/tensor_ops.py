@@ -3,15 +3,14 @@
 Tensor operation helpers for PyTorch Mastery Hub
 """
 
-import torch
+from typing import Any
+
 import numpy as np
-from typing import Union, Tuple, Optional, List, Dict, Any
+import torch
 
 
 def safe_divide(
-    numerator: torch.Tensor,
-    denominator: torch.Tensor,
-    epsilon: float = 1e-8
+    numerator: torch.Tensor, denominator: torch.Tensor, epsilon: float = 1e-8
 ) -> torch.Tensor:
     """
     Perform safe division avoiding division by zero.
@@ -50,7 +49,7 @@ def batch_matrix_multiply(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     return torch.bmm(a, b)
 
 
-def tensor_stats(tensor: torch.Tensor) -> Dict[str, float]:
+def tensor_stats(tensor: torch.Tensor) -> dict[str, float]:
     """
     Compute comprehensive statistics for a tensor.
 
@@ -64,42 +63,54 @@ def tensor_stats(tensor: torch.Tensor) -> Dict[str, float]:
         flat_tensor = tensor.view(-1)
 
         stats = {
-            'shape': list(tensor.shape),
-            'dtype': str(tensor.dtype),
-            'device': str(tensor.device),
-            'numel': tensor.numel(),
+            "shape": list(tensor.shape),
+            "dtype": str(tensor.dtype),
+            "device": str(tensor.device),
+            "numel": tensor.numel(),
         }
 
         if tensor.numel() == 0:
-            for key in ('mean', 'std', 'min', 'max', 'median', 'sum', 'norm', 'sparsity', 'memory_mb'):
-                stats[key] = float('nan')
+            for key in (
+                "mean",
+                "std",
+                "min",
+                "max",
+                "median",
+                "sum",
+                "norm",
+                "sparsity",
+                "memory_mb",
+            ):
+                stats[key] = float("nan")
             for p in [25, 50, 75, 90, 95, 99]:
-                stats[f'p{p}'] = float('nan')
+                stats[f"p{p}"] = float("nan")
             return stats
 
-        stats.update({
-            'mean': float(tensor.mean()),
-            'std': float(tensor.std()),
-            'min': float(tensor.min()),
-            'max': float(tensor.max()),
-            'median': float(tensor.median()),
-            'sum': float(tensor.sum()),
-            'norm': float(tensor.norm()),
-        })
+        stats.update(
+            {
+                "mean": float(tensor.mean()),
+                "std": float(tensor.std()),
+                "min": float(tensor.min()),
+                "max": float(tensor.max()),
+                "median": float(tensor.median()),
+                "sum": float(tensor.sum()),
+                "norm": float(tensor.norm()),
+            }
+        )
 
         # Percentiles
         percentiles = [25, 50, 75, 90, 95, 99]
         sorted_values, _ = torch.sort(flat_tensor)
         for p in percentiles:
             idx = int((p / 100.0) * (len(sorted_values) - 1))
-            stats[f'p{p}'] = float(sorted_values[idx])
+            stats[f"p{p}"] = float(sorted_values[idx])
 
         # Sparsity (percentage of zeros)
         zero_count = (tensor == 0).sum().item()
-        stats['sparsity'] = (zero_count / tensor.numel()) * 100
+        stats["sparsity"] = (zero_count / tensor.numel()) * 100
 
         # Memory usage (approximate)
-        stats['memory_mb'] = (tensor.numel() * tensor.element_size()) / (1024 * 1024)
+        stats["memory_mb"] = (tensor.numel() * tensor.element_size()) / (1024 * 1024)
 
         return stats
 
@@ -135,9 +146,7 @@ def tensor_summary(tensor: torch.Tensor, name: str = "Tensor") -> None:
 
 
 def reshape_tensor(
-    tensor: torch.Tensor,
-    new_shape: Union[List[int], Tuple[int, ...]],
-    validate: bool = True
+    tensor: torch.Tensor, new_shape: list[int] | tuple[int, ...], validate: bool = True
 ) -> torch.Tensor:
     """
     Reshape tensor with validation.
@@ -178,9 +187,9 @@ def tensor_to_numpy(tensor: torch.Tensor) -> np.ndarray:
 
 def numpy_to_tensor(
     array: np.ndarray,
-    dtype: Optional[torch.dtype] = None,
-    device: Optional[Union[str, torch.device]] = None,
-    requires_grad: bool = False
+    dtype: torch.dtype | None = None,
+    device: str | torch.device | None = None,
+    requires_grad: bool = False,
 ) -> torch.Tensor:
     """
     Convert NumPy array to PyTorch tensor.
@@ -211,9 +220,7 @@ def numpy_to_tensor(
 
 
 def create_tensor_like(
-    reference: torch.Tensor,
-    fill_value: Optional[float] = None,
-    requires_grad: Optional[bool] = None
+    reference: torch.Tensor, fill_value: float | None = None, requires_grad: bool | None = None
 ) -> torch.Tensor:
     """
     Create a new tensor with same shape and properties as reference.
@@ -242,9 +249,7 @@ def create_tensor_like(
 
 
 def concatenate_tensors(
-    tensors: List[torch.Tensor],
-    dim: int = 0,
-    validate_shapes: bool = True
+    tensors: list[torch.Tensor], dim: int = 0, validate_shapes: bool = True
 ) -> torch.Tensor:
     """
     Concatenate tensors along specified dimension.
@@ -280,9 +285,7 @@ def concatenate_tensors(
 
 
 def stack_tensors(
-    tensors: List[torch.Tensor],
-    dim: int = 0,
-    validate_shapes: bool = True
+    tensors: list[torch.Tensor], dim: int = 0, validate_shapes: bool = True
 ) -> torch.Tensor:
     """
     Stack tensors along new dimension.
@@ -311,10 +314,8 @@ def stack_tensors(
 
 
 def split_tensor(
-    tensor: torch.Tensor,
-    split_size_or_sections: Union[int, List[int]],
-    dim: int = 0
-) -> List[torch.Tensor]:
+    tensor: torch.Tensor, split_size_or_sections: int | list[int], dim: int = 0
+) -> list[torch.Tensor]:
     """
     Split tensor into chunks.
 
@@ -332,7 +333,7 @@ def split_tensor(
         return list(torch.split(tensor, split_size_or_sections, dim=dim))
 
 
-def tensor_memory_usage(tensor: torch.Tensor) -> Dict[str, Any]:
+def tensor_memory_usage(tensor: torch.Tensor) -> dict[str, Any]:
     """
     Get detailed memory usage information for tensor.
 
@@ -347,22 +348,18 @@ def tensor_memory_usage(tensor: torch.Tensor) -> Dict[str, Any]:
     total_bytes = element_size * numel
 
     return {
-        'element_size_bytes': element_size,
-        'num_elements': numel,
-        'total_bytes': total_bytes,
-        'total_kb': total_bytes / 1024,
-        'total_mb': total_bytes / (1024 * 1024),
-        'total_gb': total_bytes / (1024 * 1024 * 1024),
-        'dtype': str(tensor.dtype),
-        'shape': list(tensor.shape)
+        "element_size_bytes": element_size,
+        "num_elements": numel,
+        "total_bytes": total_bytes,
+        "total_kb": total_bytes / 1024,
+        "total_mb": total_bytes / (1024 * 1024),
+        "total_gb": total_bytes / (1024 * 1024 * 1024),
+        "dtype": str(tensor.dtype),
+        "shape": list(tensor.shape),
     }
 
 
-def flatten_tensor(
-    tensor: torch.Tensor,
-    start_dim: int = 0,
-    end_dim: int = -1
-) -> torch.Tensor:
+def flatten_tensor(tensor: torch.Tensor, start_dim: int = 0, end_dim: int = -1) -> torch.Tensor:
     """
     Flatten tensor dimensions.
 
@@ -377,10 +374,7 @@ def flatten_tensor(
     return torch.flatten(tensor, start_dim, end_dim)
 
 
-def expand_tensor(
-    tensor: torch.Tensor,
-    sizes: Union[List[int], Tuple[int, ...]]
-) -> torch.Tensor:
+def expand_tensor(tensor: torch.Tensor, sizes: list[int] | tuple[int, ...]) -> torch.Tensor:
     """
     Expand tensor to larger size.
 
@@ -394,10 +388,7 @@ def expand_tensor(
     return tensor.expand(*sizes)
 
 
-def squeeze_tensor(
-    tensor: torch.Tensor,
-    dim: Optional[int] = None
-) -> torch.Tensor:
+def squeeze_tensor(tensor: torch.Tensor, dim: int | None = None) -> torch.Tensor:
     """
     Remove single-dimensional entries.
 
@@ -413,10 +404,7 @@ def squeeze_tensor(
     return tensor.squeeze()
 
 
-def unsqueeze_tensor(
-    tensor: torch.Tensor,
-    dim: int
-) -> torch.Tensor:
+def unsqueeze_tensor(tensor: torch.Tensor, dim: int) -> torch.Tensor:
     """
     Add single-dimensional entry.
 

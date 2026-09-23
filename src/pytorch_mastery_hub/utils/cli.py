@@ -15,10 +15,10 @@ import sys
 def cmd_info(_args):
     """Print environment and package information."""
     try:
+        import matplotlib
+        import numpy
         import torch
         import torchvision
-        import numpy
-        import matplotlib
 
         print("PyTorch Mastery Hub — Environment Info")
         print("─" * 40)
@@ -27,8 +27,10 @@ def cmd_info(_args):
         print(f"  NumPy       : {numpy.__version__}")
         print(f"  Matplotlib  : {matplotlib.__version__}")
         device = (
-            "mps" if torch.backends.mps.is_available()
-            else "cuda" if torch.cuda.is_available()
+            "mps"
+            if torch.backends.mps.is_available()
+            else "cuda"
+            if torch.cuda.is_available()
             else "cpu"
         )
         print(f"  Best device : {device}")
@@ -42,6 +44,7 @@ def cmd_info(_args):
 def cmd_test(args):
     """Run the test suite."""
     import subprocess
+
     cmd = ["python", "-m", "pytest", "tests/", "-v"]
     if args.module:
         cmd += [f"tests/test_{args.module}/"]
@@ -51,9 +54,10 @@ def cmd_test(args):
 def cmd_download_data(args):
     """Download datasets."""
     import subprocess
+
     cmd = ["python", "scripts/download_datasets.py"]
     if args.datasets:
-        cmd += ["--datasets"] + args.datasets
+        cmd += ["--datasets", *args.datasets]
     sys.exit(subprocess.call(cmd))
 
 
@@ -69,13 +73,15 @@ def main():
 
     # test
     test_parser = subparsers.add_parser("test", help="Run tests")
-    test_parser.add_argument("--module", type=str, default=None,
-                             help="Module to test (e.g., 'fundamentals', 'nlp')")
+    test_parser.add_argument(
+        "--module", type=str, default=None, help="Module to test (e.g., 'fundamentals', 'nlp')"
+    )
 
     # download-data
     dl_parser = subparsers.add_parser("download-data", help="Download datasets")
     dl_parser.add_argument(
-        "--datasets", nargs="+",
+        "--datasets",
+        nargs="+",
         choices=["mnist", "fashion_mnist", "cifar10", "cifar100"],
         default=["mnist", "cifar10"],
     )

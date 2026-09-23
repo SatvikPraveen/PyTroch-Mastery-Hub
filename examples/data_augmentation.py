@@ -6,17 +6,18 @@ pytorch_mastery_hub.computer_vision.augmentation.
 Run: python examples/data_augmentation.py
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
-import torch
 import matplotlib
+import torch
+
 matplotlib.use("Agg")  # Non-interactive backend for script execution
 import matplotlib.pyplot as plt
 
-from pytorch_mastery_hub.computer_vision.augmentation import MixUp, CutMix, Mosaic
+from pytorch_mastery_hub.computer_vision.augmentation import CutMix, MixUp, Mosaic
 
 
 def show_comparison(original, augmented_dict, save_path="outputs/augmentation_demo.png"):

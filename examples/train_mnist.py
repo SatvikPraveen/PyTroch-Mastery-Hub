@@ -5,9 +5,9 @@ Demonstrates end-to-end training of an MLP using pytorch_mastery_hub utilities.
 Run: python examples/train_mnist.py [--epochs 5] [--batch-size 64]
 """
 
-import sys
-import os
 import argparse
+import os
+import sys
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
@@ -18,9 +18,8 @@ import torch.nn as nn
 from pytorch_mastery_hub.neural_networks.models import SimpleMLP
 from pytorch_mastery_hub.neural_networks.training import train_epoch, validate_epoch
 from pytorch_mastery_hub.utils.data_utils import load_dataset
-from pytorch_mastery_hub.utils.metrics import accuracy
 from pytorch_mastery_hub.utils.io_utils import save_model
-from pytorch_mastery_hub.utils.visualization import plot_training_curves
+from pytorch_mastery_hub.utils.metrics import accuracy
 
 
 def parse_args():
@@ -28,11 +27,13 @@ def parse_args():
     parser.add_argument("--epochs", type=int, default=5, help="Number of training epochs")
     parser.add_argument("--batch-size", type=int, default=64, help="Batch size")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
-    parser.add_argument("--hidden-dims", nargs="+", type=int, default=[512, 256],
-                        help="Hidden layer dimensions")
+    parser.add_argument(
+        "--hidden-dims", nargs="+", type=int, default=[512, 256], help="Hidden layer dimensions"
+    )
     parser.add_argument("--dropout", type=float, default=0.2, help="Dropout rate")
-    parser.add_argument("--save-path", type=str, default="outputs/mnist_mlp.pth",
-                        help="Path to save trained model")
+    parser.add_argument(
+        "--save-path", type=str, default="outputs/mnist_mlp.pth", help="Path to save trained model"
+    )
     parser.add_argument("--no-save", action="store_true", help="Don't save the model")
     return parser.parse_args()
 
@@ -42,8 +43,11 @@ def main():
 
     # ── Device ───────────────────────────────────────────────────
     device = torch.device(
-        "mps" if torch.backends.mps.is_available() else
-        "cuda" if torch.cuda.is_available() else "cpu"
+        "mps"
+        if torch.backends.mps.is_available()
+        else "cuda"
+        if torch.cuda.is_available()
+        else "cpu"
     )
     print(f"Using device: {device}")
 
@@ -55,9 +59,9 @@ def main():
 
     # ── Model ────────────────────────────────────────────────────
     model = SimpleMLP(
-        input_dim=784,           # 28*28 flattened MNIST
+        input_dim=784,  # 28*28 flattened MNIST
         hidden_dims=args.hidden_dims,
-        output_dim=10,           # 10 digit classes
+        output_dim=10,  # 10 digit classes
         dropout=args.dropout,
     ).to(device)
     print(f"\nModel: {model.__class__.__name__}")
@@ -86,11 +90,13 @@ def main():
         history["val_loss"].append(val_loss)
         history["val_acc"].append(val_acc)
 
-        print(f"  Epoch {epoch:2d}/{args.epochs}  |  "
-              f"train_loss: {train_loss:.4f}  |  "
-              f"val_loss: {val_loss:.4f}  |  "
-              f"val_acc: {val_acc:.2%}  |  "
-              f"time: {elapsed:.1f}s")
+        print(
+            f"  Epoch {epoch:2d}/{args.epochs}  |  "
+            f"train_loss: {train_loss:.4f}  |  "
+            f"val_loss: {val_loss:.4f}  |  "
+            f"val_acc: {val_acc:.2%}  |  "
+            f"time: {elapsed:.1f}s"
+        )
 
     # ── Save ─────────────────────────────────────────────────────
     if not args.no_save:
