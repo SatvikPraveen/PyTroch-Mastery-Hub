@@ -37,7 +37,6 @@ def cmd_info(_args: argparse.Namespace) -> int:
     import torch
 
     from .. import __version__
-    from . import __init__ as _pkg  # noqa: F401 - ensure package import works
     from .device_utils import device_info
 
     info = device_info()
