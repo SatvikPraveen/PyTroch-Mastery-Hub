@@ -30,7 +30,7 @@ _MB = 1024**2
 
 
 def _windows_working_set_bytes() -> int:  # pragma: no cover - Windows only
-    """Current working set via psapi.GetProcessMemoryInfo (no psutil dependency)."""
+    """Current working set via GetProcessMemoryInfo (no psutil dependency)."""
     from ctypes import wintypes
 
     class _PMC(ctypes.Structure):
@@ -47,11 +47,22 @@ def _windows_working_set_bytes() -> int:  # pragma: no cover - Windows only
             ("PeakPagefileUsage", ctypes.c_size_t),
         ]
 
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)  # type: ignore[attr-defined]
+    kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+    handle = kernel32.GetCurrentProcess()
     pmc = _PMC()
     pmc.cb = ctypes.sizeof(_PMC)
-    handle = ctypes.windll.kernel32.GetCurrentProcess()  # type: ignore[attr-defined]
-    ctypes.windll.psapi.GetProcessMemoryInfo(handle, ctypes.byref(pmc), pmc.cb)  # type: ignore[attr-defined]
-    return int(pmc.WorkingSetSize)
+    # psapi.GetProcessMemoryInfo is the documented entry point; kernel32 exports an alias.
+    for dll, name in (("psapi", "GetProcessMemoryInfo"), ("kernel32", "K32GetProcessMemoryInfo")):
+        try:
+            fn = getattr(ctypes.WinDLL(dll), name)  # type: ignore[attr-defined]
+        except (OSError, AttributeError):
+            continue
+        fn.argtypes = [wintypes.HANDLE, ctypes.POINTER(_PMC), wintypes.DWORD]
+        fn.restype = wintypes.BOOL
+        if fn(handle, ctypes.byref(pmc), pmc.cb):
+            return int(pmc.WorkingSetSize)
+    return 0
 
 
 def _process_rss_mb() -> float:
@@ -61,8 +72,15 @@ def _process_rss_mb() -> float:
         # ru_maxrss is bytes on macOS, kilobytes on Linux.
         return usage / _MB if sys.platform == "darwin" else usage / 1024
     if sys.platform == "win32":  # pragma: no cover
-        return _windows_working_set_bytes() / _MB
-    return 0.0  # pragma: no cover
+        rss = _windows_working_set_bytes()
+        if rss:
+            return rss / _MB
+    try:  # pragma: no cover - optional dependency
+        import psutil
+
+        return float(psutil.Process().memory_info().rss) / _MB
+    except ImportError:
+        return 0.0
 
 
 def get_memory_usage(device: torch.device | str | None = None) -> dict[str, float]:
