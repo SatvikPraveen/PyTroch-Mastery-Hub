@@ -42,7 +42,7 @@ def accuracy(y_pred: torch.Tensor, y_true: torch.Tensor, topk: int = 1) -> float
             _, predicted = y_pred.topk(topk, 1, True, True)
             predicted = predicted.t()
             correct = predicted.eq(y_true.view(1, -1).expand_as(predicted))
-            correct_k = correct[:topk].view(-1).float().sum(0, keepdim=True)
+            correct_k = correct[:topk].reshape(-1).float().sum(0, keepdim=True)
             return correct_k.item() / y_true.size(0)
 
 
