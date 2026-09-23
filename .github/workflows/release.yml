@@ -2,8 +2,11 @@ name: Release
 
 # Tag a commit `vX.Y.Z` (matching pytorch_mastery_hub.__version__) to build,
 # verify, publish to PyPI via Trusted Publishing, and create a GitHub release.
-# PyPI publishing requires the `pypi` environment to be configured with a
-# trusted publisher for this repository (Settings > Environments).
+# PyPI publishing runs only when the repository variable PYPI_PUBLISH is "true"
+# (Settings > Secrets and variables > Actions > Variables) AND a trusted publisher
+# for this repo/workflow/environment exists on pypi.org (Publishing > Add a new
+# pending publisher: owner SatvikPraveen, repo PyTroch-Mastery-Hub, workflow
+# release.yml, environment pypi). The GitHub release is created regardless.
 
 on:
   push:
@@ -57,6 +60,7 @@ jobs:
 
   publish-pypi:
     needs: test
+    if: vars.PYPI_PUBLISH == 'true'
     runs-on: ubuntu-latest
     environment:
       name: pypi
