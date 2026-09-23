@@ -3,6 +3,7 @@
 Neural network components and utilities for PyTorch Mastery Hub
 """
 
+from .attention import *
 from .ema import *
 from .layers import *
 from .models import *
@@ -40,6 +41,16 @@ __all__ = [
     "EarlyStoppingCallback",
     "ModelCheckpointCallback",
     "LearningRateSchedulerCallback",
+    # attention (modern)
+    "MultiHeadAttention",
+    "DecoderBlock",
+    "RMSNorm",
+    "RotaryEmbedding",
+    "KVCache",
+    "SwiGLU",
+    "TransformerConfig",
+    "TransformerLM",
+    "build_causal_mask",
     # ema
     "ModelEMA",
     "steps_to_reach",
