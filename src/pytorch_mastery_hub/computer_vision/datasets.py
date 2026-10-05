@@ -313,10 +313,8 @@ class CustomImageDataset(Dataset):
                 target = self.class_to_idx[row["label"]]
             elif self.mode == "regression":
                 target = float(row["target"])
-            elif self.mode == "multilabel":
+            else:  # "multilabel" (mode is validated in __init__)
                 target = torch.FloatTensor([float(x) for x in row["labels"].split(",")])
-            else:  # unreachable: validated in __init__
-                raise ValueError(f"Unknown mode {self.mode!r}")
         else:
             # JSON format
             item = self.data[idx]
