@@ -53,6 +53,7 @@ class TestSingleProcess:
 
     def test_find_free_port(self):
         assert 1024 < du.find_free_port() < 65536
+        assert 1024 < du.find_free_port("127.0.0.1") < 65536
 
 
 def _worker(rank: int, world_size: int, tmpdir: str):

@@ -101,9 +101,14 @@ def local_device() -> torch.device:
 # ------------------------------------------------------------------- lifecycle
 
 
-def find_free_port() -> int:
+def find_free_port(host: str = "127.0.0.1") -> int:
+    """Return a TCP port the OS reports as free on ``host`` (loopback by default).
+
+    Probing on loopback avoids briefly opening a listener on every interface;
+    pass the rendezvous interface address explicitly for multi-node setups.
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("", 0))
+        s.bind((host, 0))
         return int(s.getsockname()[1])
 
 
