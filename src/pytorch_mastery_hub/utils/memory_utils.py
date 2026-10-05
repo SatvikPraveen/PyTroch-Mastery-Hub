@@ -31,7 +31,7 @@ _MB = 1024**2
 
 def _windows_working_set_bytes() -> int:  # pragma: no cover - Windows only
     """Current working set via GetProcessMemoryInfo (no psutil dependency)."""
-    from ctypes import wintypes
+    import ctypes.wintypes as wintypes
 
     class _PMC(ctypes.Structure):
         _fields_ = [

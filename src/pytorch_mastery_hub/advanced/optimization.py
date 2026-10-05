@@ -12,6 +12,16 @@ import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
 
+__all__ = [
+    "KnowledgeDistillation",
+    "ModelOptimizer",
+    "ModelPruner",
+    "ModelQuantizer",
+    "benchmark_model",
+    "optimize_model",
+    "profile_model",
+]
+
 
 class ModelQuantizer:
     """Model quantization utilities."""
@@ -220,6 +230,7 @@ def optimize_model(
             return quantizer.dynamic_quantize()
         elif kwargs.get("method") == "static":
             return quantizer.static_quantize(kwargs.get("calibration_data"))
+        raise ValueError(f"Unknown quantization method: {kwargs.get('method')}")
 
     elif optimization_type == "pruning":
         pruner = ModelPruner(model)
@@ -232,6 +243,7 @@ def optimize_model(
             return pruner.structured_pruning(amount)
         elif method == "global":
             return pruner.global_pruning(amount)
+        raise ValueError(f"Unknown pruning method: {method}")
 
     else:
         raise ValueError(f"Unknown optimization type: {optimization_type}")

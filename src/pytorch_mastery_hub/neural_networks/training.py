@@ -329,17 +329,23 @@ class Callback:
     "lr": 1e-3, "epoch_time": 3.2}``.
     """
 
-    def on_train_begin(self, trainer: Trainer) -> None: ...
+    def on_train_begin(self, trainer: Trainer) -> None:
+        """Called once before the first epoch."""
 
-    def on_train_end(self, trainer: Trainer) -> None: ...
+    def on_train_end(self, trainer: Trainer) -> None:
+        """Called once after the last epoch (or early stop)."""
 
-    def on_epoch_begin(self, trainer: Trainer, epoch: int) -> None: ...
+    def on_epoch_begin(self, trainer: Trainer, epoch: int) -> None:
+        """Called at the start of every epoch."""
 
-    def on_epoch_end(self, trainer: Trainer, epoch: int, logs: dict[str, float]) -> None: ...
+    def on_epoch_end(self, trainer: Trainer, epoch: int, logs: dict[str, float]) -> None:
+        """Called after each epoch with that epoch's train/val metrics."""
 
-    def on_batch_end(self, trainer: Trainer, step: int, logs: dict[str, float]) -> None: ...
+    def on_batch_end(self, trainer: Trainer, step: int, logs: dict[str, float]) -> None:
+        """Called after every optimizer step."""
 
-    def on_validation_end(self, trainer: Trainer, epoch: int, logs: dict[str, float]) -> None: ...
+    def on_validation_end(self, trainer: Trainer, epoch: int, logs: dict[str, float]) -> None:
+        """Called after each validation pass."""
 
 
 class LambdaCallback(Callback):

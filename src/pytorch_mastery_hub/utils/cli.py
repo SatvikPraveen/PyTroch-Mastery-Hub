@@ -293,11 +293,11 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
         lhs = torch.randn(n, n, device=device, dtype=dtype)
         rhs = torch.randn(n, n, device=device, dtype=dtype)
         for _ in range(3):
-            lhs @ rhs
+            torch.matmul(lhs, rhs)
         synchronize(device)
         t0 = time.perf_counter()
         for _ in range(args.iters):
-            lhs @ rhs
+            torch.matmul(lhs, rhs)
         synchronize(device)
         ms = (time.perf_counter() - t0) / args.iters * 1e3
         tflops = 2 * n**3 / (ms / 1e3) / 1e12
