@@ -10,6 +10,20 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+__all__ = [
+    "DCGAN",
+    "WGAN",
+    "DCGANDiscriminator",
+    "DCGANGenerator",
+    "Discriminator",
+    "GANTrainer",
+    "Generator",
+    "WGANCritic",
+    "calculate_inception_score",
+    "compute_gradient_penalty",
+    "gan_loss",
+]
+
 
 class Generator(nn.Module):
     """Basic Generator for GAN."""
@@ -281,6 +295,9 @@ def compute_gradient_penalty(
     return lambda_gp * gradient_penalty
 
 
+_GAN_TYPES = ("vanilla", "lsgan", "wgan", "wgan-gp")
+
+
 class GANTrainer:
     """
     Trainer for GANs with various loss functions.
@@ -300,6 +317,8 @@ class GANTrainer:
         self.g_optimizer = g_optimizer
         self.d_optimizer = d_optimizer
         self.device = device
+        if gan_type not in _GAN_TYPES:
+            raise ValueError(f"Unknown gan_type {gan_type!r}; expected one of {_GAN_TYPES}")
         self.gan_type = gan_type
 
         if gan_type == "vanilla":
@@ -349,6 +368,9 @@ class GANTrainer:
             gp = compute_gradient_penalty(self.discriminator, real_data, fake_data, self.device)
             d_loss = -torch.mean(real_output) + torch.mean(fake_output) + gp
 
+        else:  # unreachable: validated in __init__
+            raise ValueError(f"Unknown gan_type {self.gan_type!r}")
+
         d_loss.backward()
         self.d_optimizer.step()
 
@@ -368,6 +390,8 @@ class GANTrainer:
             g_loss = self.criterion(fake_output, torch.ones_like(fake_output))
         elif self.gan_type == "wgan" or self.gan_type == "wgan-gp":
             g_loss = -torch.mean(fake_output)
+        else:  # unreachable: validated in __init__
+            raise ValueError(f"Unknown gan_type {self.gan_type!r}")
 
         g_loss.backward()
         self.g_optimizer.step()

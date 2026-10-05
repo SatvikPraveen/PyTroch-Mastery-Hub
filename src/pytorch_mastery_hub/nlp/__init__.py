@@ -24,9 +24,7 @@ __all__ = [
     "create_embedding_matrix",
     # models
     "RNNClassifier",
-    "LSTMClassifier",
     "TransformerClassifier",
-    "AttentionModel",
     "LanguageModel",
     "Seq2SeqModel",
     # text_utils

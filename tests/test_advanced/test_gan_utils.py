@@ -335,6 +335,20 @@ class TestGANTrainer:
         assert trainer.discriminator == discriminator
         assert trainer.gan_type == "vanilla"
 
+    def test_unknown_gan_type_rejected(self):
+        """An unknown gan_type fails fast instead of crashing later in train_step."""
+        generator = Generator(10, 20)
+        discriminator = Discriminator(20)
+        with pytest.raises(ValueError, match="gan_type"):
+            GANTrainer(
+                generator,
+                discriminator,
+                torch.optim.Adam(generator.parameters()),
+                torch.optim.Adam(discriminator.parameters()),
+                torch.device("cpu"),
+                gan_type="hinge",
+            )
+
     def test_vanilla_gan_train_step(self):
         """Test vanilla GAN training step."""
         generator = Generator(20, 50)
@@ -611,7 +625,7 @@ class TestErrorHandling:
         """Test handling of invalid dimensions."""
         # Test generator with invalid dimensions
         with pytest.raises((ValueError, RuntimeError)):
-            generator = Generator(0, 100)  # Invalid noise_dim
+            Generator(0, 100)  # Invalid noise_dim
 
     def test_dimension_mismatch(self):
         """Test dimension mismatch between generator and discriminator."""

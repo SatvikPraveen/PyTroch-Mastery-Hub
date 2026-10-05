@@ -16,6 +16,19 @@ import torch
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset, random_split
 
+__all__ = [
+    "CSVDataset",
+    "CustomImageDataset",
+    "ImageDataset",
+    "InMemoryDataset",
+    "ObjectDetectionDataset",
+    "SegmentationDataset",
+    "WeightedSampler",
+    "collate_fn_detection",
+    "create_dataloader",
+    "get_dataset_splits",
+]
+
 
 class ImageDataset(Dataset):
     """
@@ -269,6 +282,10 @@ class CustomImageDataset(Dataset):
         self.root_dir = Path(root_dir)
         self.transform = transform
         self.target_transform = target_transform
+        if mode not in ("classification", "regression", "multilabel"):
+            raise ValueError(
+                f"Unknown mode {mode!r}; expected 'classification', 'regression' or 'multilabel'"
+            )
         self.mode = mode
 
         # Load data
@@ -298,6 +315,8 @@ class CustomImageDataset(Dataset):
                 target = float(row["target"])
             elif self.mode == "multilabel":
                 target = torch.FloatTensor([float(x) for x in row["labels"].split(",")])
+            else:  # unreachable: validated in __init__
+                raise ValueError(f"Unknown mode {self.mode!r}")
         else:
             # JSON format
             item = self.data[idx]
