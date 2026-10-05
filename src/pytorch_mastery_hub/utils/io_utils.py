@@ -16,6 +16,19 @@ import torch
 import torch.nn as nn
 import yaml
 
+__all__ = [
+    "ModelCheckpointManager",
+    "load_checkpoint",
+    "load_config",
+    "load_model",
+    "load_results",
+    "save_checkpoint",
+    "save_config",
+    "save_model",
+    "save_results",
+    "setup_logging",
+]
+
 
 def save_model(
     model: nn.Module,
@@ -401,6 +414,7 @@ class ModelCheckpointManager:
                     checkpoint["filepath"].unlink()
                     print(f"Removed old checkpoint: {checkpoint['filepath']}")
                 except FileNotFoundError:
+                    # Already removed (e.g. by the user or another process); nothing to do.
                     pass
 
     def get_best_checkpoint(self) -> Path | None:

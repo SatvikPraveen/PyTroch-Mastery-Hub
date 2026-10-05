@@ -17,6 +17,17 @@ import torchvision.transforms as transforms
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from torch.utils.data import DataLoader, Dataset, TensorDataset, random_split
 
+__all__ = [
+    "CustomDataset",
+    "create_data_loaders",
+    "download_dataset",
+    "generate_synthetic_data",
+    "get_dataset_info",
+    "load_dataset",
+    "normalize_data",
+    "train_val_split",
+]
+
 
 def load_dataset(name: str, data_dir: str = "data", download: bool = True) -> dict[str, Any]:
     """
@@ -68,6 +79,7 @@ def _load_mnist(data_dir: Path, download: bool = True) -> dict[str, Any]:
         )
         metadata.update({"train_dataset": train_dataset, "test_dataset": test_dataset})
     except RuntimeError:
+        # Dataset not present locally and download=False: return metadata only.
         pass
 
     return metadata

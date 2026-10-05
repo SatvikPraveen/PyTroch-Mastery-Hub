@@ -10,6 +10,33 @@ import math
 import torch
 import torch.nn.functional as F
 
+__all__ = [
+    "cosine_similarity",
+    "cross_entropy",
+    "dice_loss",
+    "entropy",
+    "euclidean_distance",
+    "focal_loss",
+    "gaussian_kernel",
+    "gelu",
+    "huber_loss",
+    "jensen_shannon_divergence",
+    "kl_divergence",
+    "log_softmax",
+    "mae_loss",
+    "manhattan_distance",
+    "mish",
+    "mse_loss",
+    "mutual_information",
+    "normalize",
+    "pearson_correlation_coefficient",
+    "polynomial_kernel",
+    "softmax",
+    "spearman_correlation",
+    "standardize",
+    "swish",
+]
+
 
 def softmax(x: torch.Tensor, dim: int = -1, temperature: float = 1.0) -> torch.Tensor:
     """

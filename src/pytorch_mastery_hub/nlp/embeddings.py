@@ -12,6 +12,20 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+__all__ = [
+    "CharacterEmbedding",
+    "ContextualEmbedding",
+    "Highway",
+    "LearnedEmbedding",
+    "PositionalEncoding",
+    "SubwordEmbedding",
+    "WordEmbedding",
+    "compute_embedding_similarity",
+    "create_embedding_matrix",
+    "get_nearest_neighbors",
+    "load_pretrained_embeddings",
+]
+
 
 class WordEmbedding(nn.Module):
     """

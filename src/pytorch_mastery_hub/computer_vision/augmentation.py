@@ -13,6 +13,18 @@ import torch.nn as nn
 import torchvision.transforms.functional as TF
 from PIL import Image, ImageEnhance, ImageOps
 
+__all__ = [
+    "AdvancedAugmentationPipeline",
+    "AugMix",
+    "CopyPaste",
+    "CutMix",
+    "MixUp",
+    "Mosaic",
+    "RandAugment",
+    "RandomAugment",
+    "TrivialAugment",
+]
+
 
 class MixUp(nn.Module):
     """

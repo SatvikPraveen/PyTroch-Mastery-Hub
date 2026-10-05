@@ -10,6 +10,15 @@ import seaborn as sns
 import torch
 import torch.nn as nn
 
+__all__ = [
+    "plot_confusion_matrix",
+    "plot_gradient_flow",
+    "plot_learning_rate_schedule",
+    "plot_tensor_as_image",
+    "plot_training_curves",
+    "visualize_model_architecture",
+]
+
 # Set style
 plt.style.use("seaborn-v0_8")
 sns.set_palette("husl")

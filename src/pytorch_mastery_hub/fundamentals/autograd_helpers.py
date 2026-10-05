@@ -11,6 +11,22 @@ import torch
 import torch.nn as nn
 from torch.autograd import Function
 
+__all__ = [
+    "CustomFunction",
+    "DropoutFunction",
+    "GradientAccumulator",
+    "GradientClipping",
+    "LinearFunction",
+    "ReLUFunction",
+    "SigmoidFunction",
+    "compute_gradients",
+    "compute_hessian",
+    "compute_jacobian",
+    "gradient_check",
+    "hook_gradient",
+    "zero_gradients",
+]
+
 
 class LinearFunction(Function):
     """
