@@ -15,6 +15,17 @@ from typing import Any
 import torch
 import torch.nn as nn
 
+__all__ = [
+    "DeploymentConfig",
+    "ModelServer",
+    "ONNXExporter",
+    "TensorRTOptimizer",
+    "TorchScriptExporter",
+    "export_model",
+    "predict_response",
+    "serve_model",
+]
+
 
 class ModelServer:
     """
@@ -346,6 +357,45 @@ class TensorRTOptimizer:
             return None
 
 
+_PREDICTION_FAILED = "prediction failed"
+_server_logger = logging.getLogger(__name__)
+
+
+def predict_response(server: ModelServer, payload: Any) -> tuple[dict[str, Any], int]:
+    """
+    Turn a ``/predict`` request body into a ``(json_body, http_status)`` pair.
+
+    Exception details stay in the server log and are never returned to the
+    client, so internal paths, tensor shapes and stack traces do not leak.
+    """
+    if not isinstance(payload, dict) or "input" not in payload:
+        return {"error": "request body must be a JSON object with an 'input' field"}, 400
+
+    try:
+        result = server.predict(payload["input"])
+    except Exception:
+        _server_logger.exception("Prediction request failed")
+        return {"error": _PREDICTION_FAILED, "status": "error"}, 500
+
+    if result.get("status") != "success":
+        # ModelServer.predict already logged the underlying error.
+        return {
+            "error": _PREDICTION_FAILED,
+            "status": "error",
+            "request_id": result.get("request_id"),
+        }, 500
+
+    prediction = result["prediction"]
+    if hasattr(prediction, "tolist"):
+        prediction = prediction.tolist()
+    return {
+        "prediction": prediction,
+        "inference_time": result["inference_time"],
+        "request_id": result["request_id"],
+        "status": "success",
+    }, 200
+
+
 def serve_model(
     model_path: str,
     host: str = "127.0.0.1",
@@ -383,12 +433,8 @@ def serve_model(
 
         @app.route("/predict", methods=["POST"])
         def predict():
-            try:
-                data = request.json
-                result = server.predict(data["input"])
-                return jsonify(result)
-            except Exception as e:
-                return jsonify({"error": str(e)}), 400
+            body, status = predict_response(server, request.get_json(silent=True))
+            return jsonify(body), status
 
         @app.route("/health", methods=["GET"])
         def health():
